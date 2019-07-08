@@ -1,0 +1,121 @@
+{% load static %}
+h1 {
+  color: ivory;
+  background-color: gray;
+  border: 5px solid darkslategray;
+  padding: 15px;
+}
+
+h2 {
+	color: gray;
+	background-color: ivory;
+	text-align: center;
+	border: 5px solid silver;
+	padding: 15px
+}
+
+
+h3 {
+	color: slategray;
+	background-color: darkslategray;
+	padding: 20px;
+	text-align: center;
+	border: 5px solid dimgray;
+}
+
+h4 {
+	color: gainsboro;
+	background-color: dimgray;
+	padding: 10px;
+	border: 5px solid seashell;
+} 
+
+body {
+	background-color: LightGrey;
+	}
+	
+a:link {
+	color: darkslategray;
+	background-color: none;
+	text-decoration: none;
+	padding: 3px;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 20px;
+}
+
+a:visited {
+	color: darkslategray;
+	background-color: none;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 20px;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+ul {
+	max-width: 1600;
+	background-color: dimgray;
+	padding: 20px;
+	list-style-position: inside;
+	border: 5px solid slategray;
+	margin: auto;
+	}
+ul li {
+	color: gray;
+	background-color: gainsboro;
+	padding: 5px;
+	border: 3px solid silver;
+		}
+li a {
+	color: silver;
+	}
+.center {
+	width: 100%;
+	border: 5px solid silver;
+	padding: 20px;
+	}
+ul.main {
+	margin: auto;
+	max-width: 1200px;
+	text-align: center;
+	list-style-type: circle;
+	}
+	
+ul li.main {
+	float: center;
+	text-align: center;
+	}
+	
+ul li a.main {
+
+	color: slategray;
+	padding: 10px;
+	text-align: center;
+}
+
+table {
+	color: dimgray;
+	background-color: gainsboro;
+	border: 5px solid slategray;
+	padding: 10px;
+	margin: auto;
+	width:
+}
+ th, td {
+  border-bottom: 1px solid #003399;
+  padding: 10px;
+}
+img {
+	display: block;
+	margin: auto;
+	width: 100%;
+	padding: 10px;
+	}
+input {
+	margin: auto;
+	padding: 10px;
+	width: 100%;
+	color: gainsboro;
+	background-color: gray;
+	}
