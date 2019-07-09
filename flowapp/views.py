@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 
-from .models import Project, Flow, ActionTypes, Action
+from .models import Project, Flow, Step, StepType
 
 
 class IndexView(generic.ListView):
@@ -17,3 +17,7 @@ class IndexView(generic.ListView):
         return Project.objects.all()
 
 
+class ProjectView(generic.DetailView):
+
+    template_name = 'flowapp/flow_list.html'
+    model = Project

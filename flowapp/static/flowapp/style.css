@@ -1,8 +1,8 @@
 {% load static %}
 h1 {
   color: ivory;
-  background-color: gray;
-  border: 5px solid darkslategray;
+  background-color: darkslategray;
+  border: 5px solid gray;
   padding: 15px;
 }
 
@@ -20,7 +20,7 @@ h3 {
 	background-color: darkslategray;
 	padding: 20px;
 	text-align: center;
-	border: 5px solid dimgray;
+	border: 5px solid gainsboro;
 }
 
 h4 {
@@ -29,6 +29,13 @@ h4 {
 	padding: 10px;
 	border: 5px solid seashell;
 } 
+
+p {
+	color: darkslategray;
+	background-color: lightgrey;
+	padding: 10px;
+	border: 5px solid slategray
+	}
 
 body {
 	background-color: LightGrey;
@@ -54,6 +61,14 @@ a:hover {
 	text-decoration: underline;
 }
 ul {
+	max-width: 1600;
+	background-color: dimgray;
+	padding: 20px;
+	list-style-position: inside;
+	border: 5px solid slategray;
+	margin: auto;
+	}
+ol {
 	max-width: 1600;
 	background-color: dimgray;
 	padding: 20px;

@@ -5,9 +5,9 @@ ManTest
 </h1>
 <br>
 <body>
-<ul class="main cneter">
+<ul class="main center">
 {% for project in main %}
-<li><a href="flowapp/project/{{ project.id }}">{{ project.title }}</a></li>
+<li><a href="/project/{{ project.id }}">{{ project.title }}</a></li>
 <br>
 {% endfor %}
 </ul>
