@@ -1,20 +1,23 @@
+{% extends "flowapp/base.html" %}
+{% block title %}{{ project.title }} | Testing Steps{% endblock %}
 {% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'flowapp/style.css' %}">
-<h1>
-ManTest
-</h1>
-<h2>
-{{ project.title }} 
-</h2>
-<body>
-<ol>
-{% for flow in project.flow_set.all %}
-<h3>{{ flow.title }}</h3>
-<ul>
-{% for step in flow.step_set.all %}
-<li>{{ step.type }} {{ step.item }}</li>
-{% endfor %}
-</ul>
-{% endfor %}
-</ol>
-</body>
+{% block content %}
+	<h2>{{ project.title }} </h2>
+	{% for flow in project.flow_set.all %}
+		<div id = "{{ flow.id }}" class="flow">
+			<h3>{{ flow.title }}</h3>
+			<div class="step_list">
+				{% for step in flow.step_set.all %}
+				<div id = "{{ step.id }}" class="step">
+					 <p>
+						<input type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
+						<input type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15">
+						 {{ step.order }}: {{ step.type }} {{ step.item }}
+					</p>
+				</div>
+				{% endfor %}
+			</div> <! end step list >
+		</div>
+		<br>
+	{% endfor %}
+{% endblock %}

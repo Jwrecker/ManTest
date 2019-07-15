@@ -1,10 +1,6 @@
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'flowapp/style.css' %}">
-<h1>
-ManTest
-</h1>
-<br>
-<body>
+{% extends "flowapp/base.html" %}
+
+{% block content %}
 <ul class="main center">
 {% for project in main %}
 <li><a href="/project/{{ project.id }}">{{ project.title }}</a></li>
@@ -12,4 +8,4 @@ ManTest
 {% endfor %}
 </ul>
 
-</body>
+{% endblock %}

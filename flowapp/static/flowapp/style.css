@@ -40,7 +40,24 @@ p {
 body {
 	background-color: LightGrey;
 	}
-	
+
+a.nav:link {
+	color: ivory;
+	background-color: none;
+	text-decoration: none;
+	padding: 3px;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 40px;
+}
+
+a.nav:visited {
+	color: ivory;
+	background-color: none;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 40px;
+	text-decoration: none;
+}
+
 a:link {
 	color: darkslategray;
 	background-color: none;
@@ -90,6 +107,12 @@ li a {
 	border: 5px solid silver;
 	padding: 20px;
 	}
+
+ul.none {
+	margin: auto;
+	list-style-type: none;
+	}
+	
 ul.main {
 	margin: auto;
 	max-width: 1200px;
@@ -121,16 +144,18 @@ table {
   border-bottom: 1px solid #003399;
   padding: 10px;
 }
-img {
-	display: block;
-	margin: auto;
-	width: 100%;
-	padding: 10px;
-	}
-input {
+
+<!input {
 	margin: auto;
 	padding: 10px;
 	width: 100%;
 	color: gainsboro;
 	background-color: gray;
-	}
+	}>
+div.flow {
+	max-width: 1600;
+	background-color: dimgray;
+	padding: 20px;
+	border: 5px solid slategray;
+	margin: auto;
+}

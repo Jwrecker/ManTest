@@ -4,9 +4,9 @@ from .models import Flow, Step, StepType, Project
 
 
 class FlowAdmin(admin.ModelAdmin):
-    list_display = ('title', 'passed', 'project')
+    list_display = ('order', 'title', 'passed', 'project')
     search_fields = ['title', 'project']
-    fields = ['title', 'project', 'passed']
+    fields = ['title', 'project', 'order', 'passed']
 
 
 class ProjectAdmin(admin.ModelAdmin):
@@ -22,8 +22,8 @@ class StepAdmin(admin.ModelAdmin):
 
 
 class TypeAdmin(admin.ModelAdmin):
-    list_display = ('step_type', 'has_fixture')
-    fields = ('step_type', 'has_fixture')
+    list_display = ('title',)
+    fields = ('title', 'url_validation', 'has_fixture', 'has_verification')
 
 
 admin.site.register(Flow, FlowAdmin)
