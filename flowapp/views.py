@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt, requires_csrf_token
 from rest_framework import viewsets
 # from .serializers import UserSerializer, GroupSerializer
 
@@ -28,15 +29,17 @@ class ProjectView(generic.DetailView):
 
 
 @require_POST
-def MoveStep(request):
+def move_step(request):
 
-    pk = request.pk
-    order = request.order
+    print(dir(request))
+    print (request.POST)
+    pk = request.POST["step_pk"]
+    order = int(request.POST["new_list_position"])
 
     s = Step.objects.get(pk=pk)
     print(s)
 
-    Step.objects.move(obj = s, new_order = order)
+    Step.objects.move(obj=s, new_order=order)
 
     return HttpResponse("That seemed to work.")
 

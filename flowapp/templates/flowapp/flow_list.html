@@ -1,23 +1,62 @@
 {% extends "flowapp/base.html" %}
-{% block title %}{{ project.title }} | Testing Steps{% endblock %}
 {% load static %}
+{% block title %}{{ project.title }} | Testing Steps{% endblock %}
+{% block javascript %}
+<script>
+	function test(step_id, direction, original_order) {
+		
+		console.log(step_id);
+		console.log(direction);
+		console.log(original_order);
+		
+		function my_post_callback(data, status) {
+				console.log("--POSTED--");
+				console.log(data);
+				console.log(status);
+				}
+
+		var new_list_position
+		if (direction=="up") {
+			var new_list_position = original_order - 1;
+		} else if (direction=="down") {
+			var new_list_position = original_order + 1;
+		} else {
+		  //  TODO: RAISE AN ERROR
+		}
+
+		$.ajax({
+			type: 'POST',
+			url: 'http://127.0.0.1:8000/move-step/',
+			data: {
+				"step_pk": step_id,
+				"new_list_position": new_list_position ,
+				"csrfmiddlewaretoken": '{{ csrf_token }}'
+			},
+			success: my_post_callback,
+			});
+		}
+	</script>
+{% endblock %}
 {% block content %}
 	<h2>{{ project.title }} </h2>
 	{% for flow in project.flow_set.all %}
-		<div id = "{{ flow.id }}" class="flow">
+		<div id="{{ flow.id }}" class="flow">
 			<h3>{{ flow.title }}</h3>
 			<div class="step_list">
 				{% for step in flow.step_set.all %}
-				<div id = "{{ step.id }}" class="step">
+				<div id="{{ step.id }}" order="{{ step.order }}" class="step">
 					 <p>
-						<input type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
-						<input type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15">
-						 {{ step.order }}: {{ step.type }} {{ step.item }}
+						<input class="up" onclick="test('{{ step.id }}', 'up', {{ step.order }})" type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
+						<input class="down" onclick="test('{{ step.id }}', 'down', {{ step.order }})" type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15">
+						{{ step.order }}: {{ step.type }} {{ step.item }}
 					</p>
 				</div>
 				{% endfor %}
-			</div> <! end step list >
+			</div>
 		</div>
 		<br>
 	{% endfor %}
+<!--
+<script>document.getElementById("jst").innerHTML = getCookie('csrftoken') </script>
+-->
 {% endblock %}

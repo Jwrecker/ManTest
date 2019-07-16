@@ -2,6 +2,10 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import F, Max
+import uuid
+
+def truncated_uuid():
+    return str(uuid.uuid4()).split("-")[0]
 
 #TODO: REMOVE
 FAKE_STEP_CHOICES = [
@@ -47,49 +51,29 @@ class Project(models.Model):
 
 
 class FlowManager(models.Manager):
-
     def move(self, obj, new_order):
+        """ Move an object to a new order position """
+
         qs = self.get_queryset()
-        results = self.filter(
-            flow=obj.flow
-        ).aggregate(
-            Max('order')
-        )
-        current_order = results['order__max'] + 1
-
-        while True:
-
-            if new_order is None:
-                raise NoOrderError
-            elif int(new_order) < 1:
-                raise TooSmallError
-            elif int(new_order) > int(current_order):
-                raise NonConsecutiveError
-
+        if new_order is None:
+            raise NoOrderError
+        if new_order < 1:
+            raise TooSmallError
+        elif new_order > qs.filter(project=obj.project).count() + 1:
+            raise NotEnoughItemsError
+        else:
             with transaction.atomic():
                 if obj.order > int(new_order):
                     qs.filter(
-                        project=obj.flow,
-                        order__lt=obj.order,
-                        order__gte=new_order,
-                    ).exclude(
-                        pk=obj.pk
-                    ).update(
-                        order=F('order') + 1
-                    )
+                        project=obj.project, order__lt=obj.order, order__gte=new_order
+                    ).exclude(pk=obj.pk).update(order=F("order") + 1)
                 else:
                     qs.filter(
-                        flow=obj.flow,
-                        order__lte=new_order,
-                        order__gt=obj.order,
-                    ).exclude(
-                        pk=obj.pk
-                    ).update(
-                        order=F('order') - 1,
-                    )
+                        project=obj.project, order__lte=new_order, order__gt=obj.order
+                    ).exclude(pk=obj.pk).update(order=F("order") - 1)
+
                 obj.order = new_order
                 obj.save()
-                break
 
     def create(self, **kwargs):
         instance = self.model(**kwargs)
@@ -113,6 +97,8 @@ class FlowManager(models.Manager):
 
 
 class Flow(models.Model):
+    id = models.CharField(primary_key=True, default=truncated_uuid, editable=False, max_length=8)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     title = models.CharField(max_length=75)
     passed = models.BooleanField(default=False)
@@ -200,7 +186,8 @@ class StepManager(models.Manager):
 
 
 class Step(models.Model):
-
+    id = models.CharField(primary_key=True, default=truncated_uuid, editable=False, max_length=8)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4.split('-')[0], editable=False, )
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
     order = models.IntegerField(default=1)
     type = models.ForeignKey(StepType, on_delete=models.PROTECT)
@@ -215,11 +202,13 @@ class Step(models.Model):
 
     objects = StepManager()
 
+    def project(self):
+        return self.flow.project
+
     def __str__(self):
-        if self.item:
-            return str(self.order) + " " + str(self.type) + ": " + self.item
-        else:
-            return str(self.order) + ": " + str(self.type)
+        truncated_id = str(self.id).split('-')[0]
+        return f"Step {truncated_id} ({self.flow.project}-{self.flow.order}-{self.order})"
+        #return str(self.flow.project) + str(self.flow) + " Step" + str(self.order)
 
     class Meta:
         index_together = ('flow', 'order')
