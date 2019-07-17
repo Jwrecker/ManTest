@@ -1,7 +1,82 @@
 {% extends "flowapp/base.html" %}
 {% load static %}
-{% block title %}{{ project.title }} | Testing Steps{% endblock %}
+{% block title %}{{ project.name }} | Testing Steps{% endblock %}
 {% block javascript %}
+ <script>
+    
+        // Declare a callback function to be called every time a sortable
+        // is about to land in its new (or same) location
+        function my_ui_sort_before_stop_callback(event, ui) {
+			function my_post_callback(data, status) {
+				console.log("--POSTED--");
+				console.log(data);
+				console.log(status);
+				}
+            var moved_item_id = ui.item[0].id;
+            var target_flow_id = event.target.id;
+            var new_parent_flow_id = ui.item.parent()[0].id;
+            var new_position = ui.item.index()+1;
+            // It only counts as a move within the flow if the target and source are the same.
+            if (target_flow_id == new_parent_flow_id) {
+                console.log("");
+                console.log("-- STEP SORTED WITHIN FLOW --");
+                console.log("Step ID: " + moved_item_id);
+                console.log("FLOW ID: " + new_parent_flow_id);
+                console.log("New Position: " + new_position);
+                $.ajax({
+			type: 'POST',
+			url: 'http://127.0.0.1:8000/move-step/',
+			data: {
+				"step_pk": moved_item_id,
+				"new_list_position": new_position,
+				"old_flow": target_flow_id,
+				"new_flow": new_parent_flow_id,
+				"csrfmiddlewaretoken": '{{ csrf_token }}'
+			},
+			success: my_post_callback,
+			});
+		}
+            // If target and source are not the same, they must have moved flows
+            else {
+                console.log("");
+                console.log("-- STEP MOVED FROM ONE FLOW TO ANOTHER --");
+                console.log("Step ID: " + moved_item_id);
+                console.log("FROM FLOW ID: " + target_flow_id);
+                console.log("TO FLOW ID: " + new_parent_flow_id);
+                console.log("New Position: " + new_position);
+                $.ajax({
+			type: 'POST',
+			url: 'http://127.0.0.1:8000/move-step/',
+			data: {
+				"step_pk": moved_item_id,
+				"new_list_position": new_position,
+				"old_flow": target_flow_id,
+				"new_flow": new_parent_flow_id,
+				"csrfmiddlewaretoken": '{{ csrf_token }}'
+			},
+			success: my_post_callback,
+			});
+		}
+        };    
+
+        // Make the ordered list steps sortable
+        $( function() {
+            $( " #ol_flow_1_b8e2a961 " ).sortable({
+                beforeStop: my_ui_sort_before_stop_callback
+            }).disableSelection();
+        } );
+
+        // Make the div steps sortable and connected (so you can sort from one into the other)
+        $( function() {
+			
+            $( "{% for flow in project.flow_set.all %}#{{ flow.id }}, {% if forloop.last %} #{{flow.id}} {% endif %}{% endfor %}" ).sortable({
+                beforeStop: my_ui_sort_before_stop_callback,
+                connectWith: ".connectedSortableSteps"
+            }).disableSelection();
+        });
+
+        
+    </script>
 <script>
 	function test(step_id, direction, original_order) {
 		
@@ -38,21 +113,24 @@
 	</script>
 {% endblock %}
 {% block content %}
-	<h2>{{ project.title }} </h2>
+<style>
+.sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+        .sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+        .sortable li span { position: absolute; margin-left: -1.3em; }
+        .connectedSortableSteps div { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+        .connectedSortableSteps div span { position: absolute; margin-left: -1.3em; }
+        .bold {font-weight:bold}</style>
+	<h2>{{ project.name }} </h2>
 	{% for flow in project.flow_set.all %}
-		<div id="{{ flow.id }}" class="flow">
-			<h3>{{ flow.title }}</h3>
-			<div class="step_list">
+	<h3>{{ flow.name }}</h3>
+		<div id="{{ flow.id }}" class="connectedSortableSteps">
 				{% for step in flow.step_set.all %}
-				<div id="{{ step.id }}" order="{{ step.order }}" class="step">
-					 <p>
-						<input class="up" onclick="test('{{ step.id }}', 'up', {{ step.order }})" type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
-						<input class="down" onclick="test('{{ step.id }}', 'down', {{ step.order }})" type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15">
+				<div id="{{ step.id }}">
+						<!-- <input class="up" onclick="test('{{ step.id }}', 'up', {{ step.order }})" type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
+						<input class="down" onclick="test('{{ step.id }}', 'down', {{ step.order }})" type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15"> -->
 						{{ step.order }}: {{ step.type }} {{ step.item }}
-					</p>
 				</div>
 				{% endfor %}
-			</div>
 		</div>
 		<br>
 	{% endfor %}

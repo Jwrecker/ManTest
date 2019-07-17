@@ -5,7 +5,7 @@ from . import views
 
 app_name = "flowapp"
 urlpatterns = [
-    path('', views.IndexView.as_view(), name='main'),
-    path('project/<int:pk>', views.ProjectView.as_view(), name='project'),
+    path('', views.ProjectListView.as_view(), name='main'),
+    path('project/<int:pk>', views.ProjectDetailView.as_view(), name='project'),
     path('move-step/', views.move_step, name='move-step'),
 ]

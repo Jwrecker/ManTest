@@ -2,9 +2,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	<title>{% block title %}UH?{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'flowapp/style.css' %}">
-    <title>{% block title %}My sucky site{% endblock %}</title>
-    
+	<meta name="robots" content="noindex" />
 	<script>
 		function getCookie(name) {
 		var cookieValue = null;
@@ -22,7 +22,9 @@
 		return cookieValue;
 	}
 	var csrftoken = getCookie('csrftoken');</script>
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> -->
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 {% block javascript %}{% endblock %}
 </head>
 

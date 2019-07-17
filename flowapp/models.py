@@ -7,19 +7,25 @@ import uuid
 def truncated_uuid():
     return str(uuid.uuid4()).split("-")[0]
 
-#TODO: REMOVE
-FAKE_STEP_CHOICES = [
-    ('Load', 'Load URL'),
-    ('Click', 'Click On'),
-    ('Enter', 'Enter In'),
-    ('Set', 'Set'),
-    ('Verify', 'Verification'),
-]
+
+#TODO: REMOVE AFTER DEFINING
+#FAKE_STEP_CHOICES = [
+#    ('Load', 'Load URL'),
+#    ('Click', 'Click On'),
+#    ('Enter', 'Enter In'),
+#    ('Set', 'Set'),
+#    ('Verify', 'Verification'),
+#]
+
+
+DISALLOWED = 'D'
+ALLOWED = 'A'
+REQUIRED = 'R'
 
 VALIDATION_CHOICES = [
-    ('Disallowed', 'Disallowed'),
-    ('Optional', 'Optional'),
-    ('Required', 'Required'),
+    (DISALLOWED, 'Disallowed'),
+    (ALLOWED, 'Allowed'),
+    (REQUIRED, 'Required'),
 ]
 
 
@@ -31,7 +37,7 @@ class NoOrderError(Error):
     pass
 
 
-class TooSmallError(Error):
+class PositionTooLowError(Error):
     pass
 
 
@@ -39,28 +45,29 @@ class NonConsecutiveError(Error):
     pass
 
 
-class NotEnoughItemsError(Error):
+class PositionTooHighError(Error):
     pass
 
 
 class Project(models.Model):
-    title = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class FlowManager(models.Manager):
     def move(self, obj, new_order):
+        # TODO COPY STUFF FROM STEP
         """ Move an object to a new order position """
 
         qs = self.get_queryset()
         if new_order is None:
             raise NoOrderError
         if new_order < 1:
-            raise TooSmallError
+            raise PositionTooLowError
         elif new_order > qs.filter(project=obj.project).count() + 1:
-            raise NotEnoughItemsError
+            raise PositionTooHighError
         else:
             with transaction.atomic():
                 if obj.order > int(new_order):
@@ -98,39 +105,38 @@ class FlowManager(models.Manager):
 
 class Flow(models.Model):
     id = models.CharField(primary_key=True, default=truncated_uuid, editable=False, max_length=8)
-    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    title = models.CharField(max_length=75)
+    name = models.CharField(max_length=75)
     passed = models.BooleanField(default=False)
     order = models.IntegerField(default=1)
 
     objects = FlowManager()
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class StepType(models.Model):
-    title = models.CharField(max_length=15, null=True)
+    name = models.CharField(unique=True, max_length=30)
     url_validation = models.CharField(
-        max_length=15,
+        max_length=1,
         choices=VALIDATION_CHOICES,
-        default='Optional'
+        default='ALLOWED'
     )
     has_verification = models.CharField(
-        max_length=15,
+        max_length=1,
         choices=VALIDATION_CHOICES,
-        default='Optional'
+        default='ALLOWED'
     )
     has_fixture = models.CharField(
-        max_length=15,
+        max_length=1,
         choices=VALIDATION_CHOICES,
-        default='Optional'
+        default='ALLOWED'
     )
 
     def __str__(self):
-        if self.title:
-            return str(self.title)
+        if self.name:
+            return str(self.name)
         else:
             return ""
 
@@ -138,29 +144,43 @@ class StepType(models.Model):
 class StepManager(models.Manager):
     """ Manager to encapsulate bits of business logic """
 
-    def move(self, obj, new_order):
-        """ Move an object to a new order position """
+    def move(self, obj, new_order, source_flow, target_flow):
+        """ Move an object to a new order position (potentially in a new flow) """
 
-        qs = self.get_queryset()
         if new_order is None:
             raise NoOrderError
         if new_order < 1:
-            raise TooSmallError
-        elif new_order > qs.filter(flow=obj.flow).count()+1:
-            raise NotEnoughItemsError
-        else:
+            raise PositionTooLowError
+        qs = self.get_queryset()
+        if new_order > qs.filter(flow=target_flow).count() + 1:
+            raise PositionTooHighError
+
+        if source_flow == target_flow:
+            # Moving position within a flow
             with transaction.atomic():
+                # If you are moving the step to a lower position (closer to 1) ...
                 if obj.order > int(new_order):
+                    # ... take everything in between the old position and the new position and move them up one
                     qs.filter(
                         flow=obj.flow, order__lt=obj.order, order__gte=new_order
                     ).exclude(pk=obj.pk).update(order=F("order") + 1)
+                # ... but if you're moving the step to higher position (or staying the same) #TODO fix somewhere in the process?
                 else:
+                    # ... lower the position of any step in between the old position and the new position
                     qs.filter(
                         flow=obj.flow, order__lte=new_order, order__gt=obj.order
                     ).exclude(pk=obj.pk).update(order=F("order") - 1)
-
+                # ... and save the new position
                 obj.order = new_order
                 obj.save()
+        else:
+            # Moved fom one flow to another
+            # TODO Copy crap into here and fix
+            pass
+
+
+    def remove(self, obj):
+        pass
 
     def create(self, **kwargs):
         instance = self.model(**kwargs)
@@ -190,7 +210,7 @@ class Step(models.Model):
     #id = models.UUIDField(primary_key=True, default=uuid.uuid4.split('-')[0], editable=False, )
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
     order = models.IntegerField(default=1)
-    type = models.ForeignKey(StepType, on_delete=models.PROTECT)
+    step_type = models.ForeignKey(StepType, on_delete=models.PROTECT)
     desired_result = models.CharField(max_length=500, blank=True, null=True)
     passed = models.BooleanField(default=False, blank=True, null=True)
     has_fixture = models.BooleanField(default=False)
@@ -204,6 +224,8 @@ class Step(models.Model):
 
     def project(self):
         return self.flow.project
+    project.short_description = 'Project'
+
 
     def __str__(self):
         truncated_id = str(self.id).split('-')[0]
