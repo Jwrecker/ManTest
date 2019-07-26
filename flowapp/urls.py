@@ -8,4 +8,6 @@ urlpatterns = [
     path('', views.ProjectListView.as_view(), name='main'),
     path('project/<int:pk>', views.ProjectDetailView.as_view(), name='project'),
     path('move-step/', views.move_step, name='move-step'),
+    path('add-step/', views.add_step, name='add-step')
 ]
+

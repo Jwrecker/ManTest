@@ -1,0 +1,11 @@
+<form action="/insert-step/" method="post">
+{% csrf_token %}
+{% if step_type_answer.has_verification == "R" or "A" %}
+{{ step_form.passed }}
+{{ step_form.desired_result }}
+{% elseif step_type_answer.has_fixture == "R" of "A" %}
+{{ step_form.has_fixture }}
+{{ step_form.fixture_name }}
+{% endif %}
+{{ step_form.item }}
+</form>

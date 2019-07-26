@@ -141,6 +141,9 @@ class StepType(models.Model):
             return ""
 
 
+
+
+
 class StepManager(models.Manager):
     """ Manager to encapsulate bits of business logic """
 
@@ -152,7 +155,7 @@ class StepManager(models.Manager):
         if new_order < 1:
             raise PositionTooLowError
         qs = self.get_queryset()
-        if new_order > qs.filter(flow=target_flow).count() + 1:
+        if new_order > qs.filter(flow=obj.flow).count() + 2:
             raise PositionTooHighError
 
         if source_flow == target_flow:
@@ -164,7 +167,7 @@ class StepManager(models.Manager):
                     qs.filter(
                         flow=obj.flow, order__lt=obj.order, order__gte=new_order
                     ).exclude(pk=obj.pk).update(order=F("order") + 1)
-                # ... but if you're moving the step to higher position (or staying the same) #TODO fix somewhere in the process?
+                # ... but if you're moving the step to higher position (or staying the same)
                 else:
                     # ... lower the position of any step in between the old position and the new position
                     qs.filter(
@@ -174,13 +177,19 @@ class StepManager(models.Manager):
                 obj.order = new_order
                 obj.save()
         else:
-            # Moved fom one flow to another
             # TODO Copy crap into here and fix
-            pass
-
-
-    def remove(self, obj):
-        pass
+            # Moving position between flows
+            with transaction.atomic():
+                qs.filter(
+                    flow=obj.flow, order__gte=obj.order
+                ).exclude(pk=obj.pk).update(order=F("order") - 1)
+            obj.flow = target_flow
+            obj.order = new_order
+            with transaction.atomic():
+                qs.filter(
+                    flow=obj.flow, order__gte=obj.order
+                ).exclude(pk=obj.pk).update(order=F("order") + 1)
+            obj.save()
 
     def create(self, **kwargs):
         instance = self.model(**kwargs)
@@ -203,6 +212,17 @@ class StepManager(models.Manager):
             instance.save()
 
             return instance
+
+    def insert(self, order, target_flow, **kwargs):
+        s = Step.objects.create(flow=target_flow, **kwargs)
+        Step.objects.move(s, order, target_flow, target_flow)
+
+    def remove(self, obj):
+        with transaction.atomic():
+            Step.objects.all().filter(
+                      flow=obj.flow, order__gte=obj.order
+                 ).exclude(pk=obj.pk).update(order=F("order") - 1)
+        Step.objects.get(pk=obj.pk, flow=obj.flow).delete()
 
 
 class Step(models.Model):

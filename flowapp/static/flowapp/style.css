@@ -14,6 +14,14 @@ h2 {
 	padding: 15px
 }
 
+.hidden {
+	opacity: 0;
+	transition: opacity 0.5s ease;
+}
+
+.hidden:hover {
+	opacity: 1;
+}
 
 h3 {
 	color: slategray;
@@ -145,13 +153,24 @@ table {
   padding: 10px;
 }
 
-<!input {
-	margin: auto;
+.connectedSortableSteps {
+	color: darkslategray;
+	background-color: dimgray;
+	border: 2px solid gainsboro;
+	padding: 5px;
+}
+
+.connectedSortableSteps div span {
+	border: 2px solid gainsboro;
+}
+
+.step {
+	color: darkslategray;
+	background-color: gainsboro;
+	border: 5px solid darkslategray;
 	padding: 10px;
-	width: 100%;
-	color: gainsboro;
-	background-color: gray;
-	}>
+}
+
 div.flow {
 	max-width: 1600;
 	background-color: dimgray;
