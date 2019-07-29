@@ -4,15 +4,57 @@
 
 {% block javascript %}
 
-
 {% endblock %}
 
 {% block content %}
-	{% for step_type in step_types %}
-	<form>
-	{% csrf_token %}
-	
-	</form>
 
+	{% for st in step_types %}
+		<!-- <p onclick="getStepForm({{ step_type.id }})">{{ step_type.name }}</p> -->
+		<form action="/step-form/" method="post">
+			{% csrf_token %}
+			{{ f.as_p }}
+			<input type="Submit">
+		</form>
+	{% endfor %}
 
 {% endblock %}
+
+{% comment %}
+	{% block content %}
+
+		{% for f in forms %}
+			<!-- <p onclick="getStepForm({{ step_type.id }})">{{ step_type.name }}</p> -->
+			<form action="/step-form/" method="post">
+				{% csrf_token %}
+				{{ f.as_p }}
+				<input type="Submit">
+			</form>
+		{% endfor %}
+
+	{% endblock %}
+{% endcomment %}
+
+{% comment %}
+	<script>
+	// TODO Make an Ajax function that posts to get_step_form ??
+	function getStepForm(step_type_id) {
+			$.ajax({
+				type: 'POST',
+				url: 'http://127.0.0.1:8000/get-step-form/',
+				data: {
+					"step_type_id": step_type_id,
+					"csrfmiddlewaretoken": '{{ csrf_token }}'
+				},
+			});
+	</script>
+
+	{% for step_type in step_type_list %}
+		<p onclick="getStepForm({{ step_type.id }})">{{ step_type.name }}</p>
+		<form action="/add-step/" method="post">
+			{% csrf_token %}
+			{{ form.as_table }}
+	
+			<input type="Submit">
+		</form>
+	{% endfor %}
+{% endcomment %}

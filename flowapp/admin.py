@@ -22,10 +22,10 @@ class FlowAdmin(admin.ModelAdmin):
 
 
 class StepAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'project', 'flow', 'order', 'step_type', 'item')
+    list_display = ('__str__', 'project', 'flow', 'order', 'step_type', 'url')
     list_filter = ('flow__project', 'flow')
     ordering = ('flow__project', 'flow', 'order')
-    fields = ('flow', 'step_type', 'item', 'order', 'desired_result', 'passed', 'fixture_name')
+    fields = ('flow', 'step_type', 'url', 'order', 'desired_result', 'passed', 'fixture')
 
 
 admin.site.register(StepType, TypeAdmin)

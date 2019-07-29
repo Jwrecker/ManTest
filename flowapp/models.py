@@ -116,34 +116,6 @@ class Flow(models.Model):
         return self.name
 
 
-class StepType(models.Model):
-    name = models.CharField(unique=True, max_length=30)
-    url_validation = models.CharField(
-        max_length=1,
-        choices=VALIDATION_CHOICES,
-        default='ALLOWED'
-    )
-    has_verification = models.CharField(
-        max_length=1,
-        choices=VALIDATION_CHOICES,
-        default='ALLOWED'
-    )
-    has_fixture = models.CharField(
-        max_length=1,
-        choices=VALIDATION_CHOICES,
-        default='ALLOWED'
-    )
-
-    def __str__(self):
-        if self.name:
-            return str(self.name)
-        else:
-            return ""
-
-
-
-
-
 class StepManager(models.Manager):
     """ Manager to encapsulate bits of business logic """
 
@@ -225,6 +197,31 @@ class StepManager(models.Manager):
         Step.objects.get(pk=obj.pk, flow=obj.flow).delete()
 
 
+class StepType(models.Model):
+    name = models.CharField(unique=True, max_length=30)
+    url_validation = models.CharField(
+        max_length=1,
+        choices=VALIDATION_CHOICES,
+        default='ALLOWED'
+    )
+    has_verification = models.CharField(
+        max_length=1,
+        choices=VALIDATION_CHOICES,
+        default='ALLOWED'
+    )
+    has_fixture = models.CharField(
+        max_length=1,
+        choices=VALIDATION_CHOICES,
+        default='ALLOWED'
+    )
+
+    def __str__(self):
+        if self.name:
+            return str(self.name)
+        else:
+            return ""
+
+
 class Step(models.Model):
     id = models.CharField(primary_key=True, default=truncated_uuid, editable=False, max_length=8)
     #id = models.UUIDField(primary_key=True, default=uuid.uuid4.split('-')[0], editable=False, )
@@ -233,12 +230,8 @@ class Step(models.Model):
     step_type = models.ForeignKey(StepType, on_delete=models.PROTECT)
     desired_result = models.CharField(max_length=500, blank=True, null=True)
     passed = models.BooleanField(default=False, blank=True, null=True)
-    has_fixture = models.BooleanField(default=False)
-    fixture_name = models.CharField(max_length=100, blank=True, null=True)
-    if type == 'Load':
-        item = models.URLField(blank=True, null=True)
-    else:
-        item = models.CharField(max_length=100, blank=True, null=True)
+    fixture = models.CharField(max_length=100, blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
 
     objects = StepManager()
 

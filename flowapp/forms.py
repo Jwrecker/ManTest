@@ -10,35 +10,49 @@ class StepForm(ModelForm):
 
     class Meta:
         model = Step
-        fields = ['flow', 'order', 'item', 'passed', 'desired_result', 'has_fixture', 'fixture_name']
+        fields = ['flow', 'order', 'url', 'passed', 'desired_result', 'fixture']
+
+
 
     def __init__(self, step_type_id, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+#        self.fields["flow"].initial = 1
+#        self.fields["flow"].hidden = True
+#        print(dir( self.fields["flow"]))
+
         step_type = StepType.objects.get(id=step_type_id)
         if step_type.has_fixture == "R":
-            self.has_fixture.required = True
-            self.fixture_name.required = True
+            self.fields["fixture"].required = True
         elif step_type.has_fixture == "D":
-            self.has_fixture = none
-            self.fixture_name = none
-        else:
+            del self.fields['fixture']
+        elif step_type.has_fixture == "A":
             pass
+        else:
+            # TODO, fix this and copy it elsewhere
+            raise Exception('What the heck?')
 
         if step_type.has_verification == "R":
-            self.passed.required = True
-            self.desired_result = True
+            self.fields["passed"].required = True
+            self.fields["desired_result"].required = True
         elif step_type.has_verification == "D":
-            self.passed = none
-            self.desired_result = none
-        else:
+            del self.fields["passed"]
+            del self.fields["desired_result"]
+        elif step_type.has_verification == "A":
             pass
+        else:
+            # TODO, fix this and copy it elsewhere
+            raise Exception('What the heck?')
 
         if step_type.url_validation == "R":
-            self.item.required = True
+            self.fields["url"].required = True
         elif step_type.url_validation == "D":
-            self.item = none
-        else:
+            del self.fields["url"]
+        elif step_type.url_validation == "A":
             pass
+        else:
+            # TODO, fix this and copy it elsewhere
+            raise Exception('What the heck?')
 
 
 

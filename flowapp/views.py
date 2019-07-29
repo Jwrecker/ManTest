@@ -45,6 +45,18 @@ class ProjectDetailView(generic.DetailView):
         return context
 
 
+class TestFormView(generic.ListView):
+    """
+    A view to test how the forms render
+    """
+    template_name = 'flowapp/test_forms.html'
+    model = StepType
+    context_object_name = 'step_type_list'
+
+    def get_queryset(self):
+        return StepType.objects.all()
+
+
 @require_POST
 def move_step(request):
     """
@@ -71,77 +83,83 @@ def move_step(request):
         # TODO: Either have step_type in the form, and validate after to see if they did it correctly, or load a second form.
 
 
-class StepFormBuilder():
-    """
-    Builds forms based of a given step type.
-    """
-    def build_form(self):
-        class StepForm(forms.Form):
-            step_type = self
-            order = forms.IntegerField()
-            flow = forms.ModelChoiceField(queryset=Flow.objects.all())
-            if step_type.has_verification == "A":
-                passed = forms.NullBooleanField()
-                desired_result = forms.CharField(max_length=500, required=False)
-            elif step_type.has_verification == "R":
-                passed = forms.BooleanField()
-                desired_result = forms.CharField(max_length=500, required=True)
-            else:
-                pass
-            if step_type.has_fixture == "A":
-                has_fixture = forms.NullBooleanField()
-                fixture_name = forms.CharField(max_length=100, required=False)
-            elif step_type.has_fixture == "R":
-                has_fixture = forms.BooleanField()
-                fixture_name = forms.CharField(max_length=100)
-            else:
-                pass
-            if step_type.url_validation == "A":
-                item = forms.URLField(max_length=200, required=False)
-            elif step_type.url_validation == "R":
-                item = forms.URLField(max_length=200, required=True)
-            else:
-                item = forms.CharField(max_length=200, required=False)
 
-        return StepForm()
+def get_step_forms(request):
+    step_type_id = request.POST.get("step_type_id")
+    print(step_type_id)
+    form = StepForm(step_type_id=step_type_id)
+    return render(request, 'flowapp/test_forms.html', {'form': form, 'step_type_id': step_type_id})
 
 
-def get_step_form(request):
+def test_step_forms(request):
+#    context = {}
+#    forms = []
+#    for st in StepType.objects.all():
+#        forms.append(StepForm(step_type_id=st.pk))
+#    context['forms'] = forms
+#    return render(request, 'flowapp/test_forms.html', context)
+
+    context = {}
+    step_types = StepType.objects.all()
+    context['step_types'] = step_types
+    return render(request, 'flowapp/test_forms.html', context)
+
+
+def step_form(request):
+    step_type_id = request.POST.get("step_type_id")
+    print(step_type_id)
+
     if request.method == 'POST':
-        step_type_id = request.POST.get("step_type_id")
-        print(step_type_id)
+        #action = request.POST.get("action")
+        #if action == "create":
+        form = StepForm(step_type_id, request.POST)
+        if form.is_valid():
+            desired_result = form.cleaned_data['desired_result']
+            fixture = form.cleaned_data['fixture']
+            passed = form.cleaned_data['passed']
+            url = form.cleaned_data['url']
+            flow = form.cleaned_data['flow']
+            # step_type = StepType.objects.get(pk=step_type_id)
+            step = Step.objects.create(flow=flow,
+                                       desired_result=desired_result,
+                                       fixture=fixture,
+                                       passed=passed,
+                                       url=url
+                                       )
+            step.save()
+            return HttpResponse("Cool")
+    else:
         form = StepForm(step_type_id=step_type_id)
-        return render(request, 'flowapp/test_forms.html', {'form': form})
+        HttpResponse(form.as_p())
+    return render(request, 'flowapp/test_forms.html', {'form': form})
+
 
 
 def add_step(request):
     if request.method == 'POST':
         step_type_id = request.POST.get("step_type_id")
         print(step_type_id)
-        form = StepForm(step_type_id=step_type_id)
+        form = StepForm(request.POST)
         print(form)
 
         if form.is_valid():
             desired_result = form.cleaned_data['desired_result']
-            has_fixture = form.cleaned_data['has_fixture']
-            fixture_name = form.cleaned_data['fixture_name']
+            fixture = form.cleaned_data['fixture']
             passed = form.cleaned_data['passed']
-            item = form.cleaned_data['item']
-            flow = form.cleaned_data['flow']StepFormBuilder.build_form(step_type)
-            step_type = StepType.objects.get(pk=step_type_id)
+            url = form.cleaned_data['url']
+            flow = form.cleaned_data['flow']
+            # step_type = StepType.objects.get(pk=step_type_id)
             step = Step.objects.create(flow=flow,
-                                       step_type=step_type,
                                        desired_result=desired_result,
-                                       has_fixture=has_fixture,
-                                       fixture_name=fixture_name,
+                                       fixture=fixture,
                                        passed=passed,
-                                       item=item
+                                       url=url
                                        )
             step.save()
-            return HttpResponseRedirect('/project/')
+            return HttpResponse("Cool")
         else:
             form = StepForm(step_type_id=step_type_id)
-        return render(request, 'flowapp/flow_list.html', {'form': form})
+        return render(request, 'flowapp/test_forms.html', {'form': form})
 
 
 
@@ -155,7 +173,7 @@ def add_step(request):
 #                    desired_result=s.desired_result,
 #                    passed=s.passed,
 #                    has_fixture=s.has_fixture,
-#                    fixture_name=s.fixture_name,
+#                    fixture=s.fixture,
 #                    item=s.item
 #                )
 #        Step.objects.move(n, order)
@@ -173,7 +191,7 @@ def add_step(request):
 #            desired_result=s.desired_result,
 #            passed=s.passed,
 #            has_fixture=s.has_fixture,
-#            fixture_name=s.fixture_name,
+#            fixture=s.fixture,
 #            item=s.item
 #        )
     # Find counts of Flows

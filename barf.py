@@ -72,7 +72,7 @@ def create_objects():
         f.save()
         # Create 4 steps of our fake type to each
         for k in range(1, 5):
-            s = Step.objects.create(flow=f, step_type=fake_type, order=k, item="URL")
+            s = Step.objects.create(flow=f, step_type=fake_type, order=k, url="URL.com")
             s.save()
 
 
