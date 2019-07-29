@@ -6,7 +6,46 @@ from django.utils import timezone
 from .models import StepType, Project, Flow, Step
 
 
-class StepForm(forms.Form):
+class StepForm(ModelForm):
+
+    class Meta:
+        model = Step
+        fields = ['flow', 'order', 'item', 'passed', 'desired_result', 'has_fixture', 'fixture_name']
+
+    def __init__(self, step_type_id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        step_type = StepType.objects.get(id=step_type_id)
+        if step_type.has_fixture == "R":
+            self.has_fixture.required = True
+            self.fixture_name.required = True
+        elif step_type.has_fixture == "D":
+            self.has_fixture = none
+            self.fixture_name = none
+        else:
+            pass
+
+        if step_type.has_verification == "R":
+            self.passed.required = True
+            self.desired_result = True
+        elif step_type.has_verification == "D":
+            self.passed = none
+            self.desired_result = none
+        else:
+            pass
+
+        if step_type.url_validation == "R":
+            self.item.required = True
+        elif step_type.url_validation == "D":
+            self.item = none
+        else:
+            pass
+
+
+
+
+
+
+"""
     step_type = forms.ModelChoiceField(queryset=StepType.objects.all())
     order = forms.IntegerField()
     item = forms.CharField(max_length=100)
@@ -15,12 +54,6 @@ class StepForm(forms.Form):
     has_fixture = forms.NullBooleanField()
     fixture_name = forms.CharField(max_length=100)
 
-#    class Meta:
-#        model = Step
-#        fields = ['step_type', 'flow', 'order', 'item', 'passed', 'desired_result', 'has_fixture', 'fixture_name']
-
-
-"""
 class DefaultStepForm(forms.Form):
     order = forms.IntegerField(defualt=1)
     flow = forms.ModelChoiceField(queryset=Flow.objects.all())

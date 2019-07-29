@@ -10,7 +10,7 @@ from rest_framework import viewsets
 from django import forms
 
 # from .serializers import UserSerializer, GroupSerializer
-# from .forms import *
+from .forms import *
 
 from .models import Project, Flow, Step, StepType
 
@@ -61,13 +61,13 @@ def move_step(request):
     json_data = {"old_flow_id": old_flow_id, "new_flow_id": new_flow_id}
     return JsonResponse(json_data)
 
-def get_step_type(request):
-    if request.method == 'POST':
-
-        form = StepTypeForm
-
-        if form.is_valid():
-            step_type = form.cleaned_data['step_type']
+#def get_step_type(request):
+#    if request.method == 'POST':
+#
+#        form = StepTypeForm
+#
+#        if form.is_valid():
+#            step_type = form.cleaned_data['step_type']
         # TODO: Either have step_type in the form, and validate after to see if they did it correctly, or load a second form.
 
 
@@ -106,20 +106,19 @@ class StepFormBuilder():
         return StepForm()
 
 
-def get_step_type(request):
+def get_step_form(request):
     if request.method == 'POST':
         step_type_id = request.POST.get("step_type_id")
         print(step_type_id)
-        step_type = StepType.objects.get(pk=step_type_id)
-        form = StepFormBuilder.build_form(step_type)
+        form = StepForm(step_type_id=step_type_id)
+        return render(request, 'flowapp/test_forms.html', {'form': form})
 
 
 def add_step(request):
     if request.method == 'POST':
         step_type_id = request.POST.get("step_type_id")
         print(step_type_id)
-        step_type = StepType.objects.get(pk=step_type_id)
-        form = StepFormBuilder.build_form(step_type)
+        form = StepForm(step_type_id=step_type_id)
         print(form)
 
         if form.is_valid():
@@ -128,7 +127,8 @@ def add_step(request):
             fixture_name = form.cleaned_data['fixture_name']
             passed = form.cleaned_data['passed']
             item = form.cleaned_data['item']
-            flow = form.cleaned_data['flow']
+            flow = form.cleaned_data['flow']StepFormBuilder.build_form(step_type)
+            step_type = StepType.objects.get(pk=step_type_id)
             step = Step.objects.create(flow=flow,
                                        step_type=step_type,
                                        desired_result=desired_result,
@@ -140,7 +140,7 @@ def add_step(request):
             step.save()
             return HttpResponseRedirect('/project/')
         else:
-            form = StepFormBuilder.build_form(step_type)
+            form = StepForm(step_type_id=step_type_id)
         return render(request, 'flowapp/flow_list.html', {'form': form})
 
 

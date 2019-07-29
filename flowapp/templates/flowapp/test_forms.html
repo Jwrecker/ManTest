@@ -1,0 +1,18 @@
+{% extends "flowapp/base.html" %}
+{% load static %}
+{% block title %}{{ project.name }} | Testing Forms{% endblock %}
+
+{% block javascript %}
+
+
+{% endblock %}
+
+{% block content %}
+	{% for step_type in step_types %}
+	<form>
+	{% csrf_token %}
+	
+	</form>
+
+
+{% endblock %}
