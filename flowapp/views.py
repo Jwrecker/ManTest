@@ -128,10 +128,11 @@ def step_form(request):
                                        )
             step.save()
             return HttpResponse("Cool")
+        else:
+            form = StepForm(step_type_id=step_type_id)
+            return HttpResponse(form.as_p())
     else:
-        form = StepForm(step_type_id=step_type_id)
-        HttpResponse(form.as_p())
-    return render(request, 'flowapp/test_forms.html', {'form': form})
+        return render(request, 'flowapp/test_forms.html', {'form': form})
 
 
 
