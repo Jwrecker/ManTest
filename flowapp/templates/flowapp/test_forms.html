@@ -3,20 +3,46 @@
 {% block title %}{{ project.name }} | Testing Forms{% endblock %}
 
 {% block javascript %}
-
+<script>
+	function getFormData($form){
+		var unindexed_array = $form.serializeArray();
+		var indexed_array = {};
+		
+		$.map(unindexed_array, function(n, i){
+			indexed_array[n['name']] = n['value'];
+		});
+		
+		return indexed_array;
+	}
+</script>
+<script>
+	function postStepFormcallback(data) {
+		console.log(data)
+	}
+	function postStepForm(step_form_id){
+		var $form = $("#"+step_form_id);
+		var formData = getFormData($form);
+		$.ajax({
+				type: 'POST',
+				url: 'http://127.0.0.1:8000/step-form/',
+				data: {
+					"csrfmiddlewaretoken": '{{ csrf_token }}',
+					formData: formData,
+				},
+			});
+			console.log(formData)
+	}
+</script>
 {% endblock %}
 
 {% block content %}
-
-	{% for st in step_types %}
-		<!-- <p onclick="getStepForm({{ step_type.id }})">{{ step_type.name }}</p> -->
-		<form action="/step-form/" method="post">
+		<form action="/#/" method="post" id="form">
 			{% csrf_token %}
-			{{ f.as_p }}
-			<input type="Submit">
+			{{ form.as_p }}
 		</form>
-	{% endfor %}
-
+			<button onclick="postStepForm('form')"
+			"> Submit
+			</button>
 {% endblock %}
 
 {% comment %}

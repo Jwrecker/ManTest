@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt, requires_csrf_token
 from rest_framework import viewsets
 from django import forms
+from django.core import serializers
 
 # from .serializers import UserSerializer, GroupSerializer
 from .forms import *
@@ -84,56 +85,65 @@ def move_step(request):
 
 
 
-def get_step_forms(request):
-    step_type_id = request.POST.get("step_type_id")
-    print(step_type_id)
+def get_step_forms(request, pk):
+    step_type_id = pk
     form = StepForm(step_type_id=step_type_id)
-    return render(request, 'flowapp/test_forms.html', {'form': form, 'step_type_id': step_type_id})
+    return render(request, 'flowapp/test_forms.html', {'form': form})
 
 
 def test_step_forms(request):
-#    context = {}
-#    forms = []
-#    for st in StepType.objects.all():
-#        forms.append(StepForm(step_type_id=st.pk))
-#    context['forms'] = forms
+    if request.method == "POST":
+        data = request.POST
+        print(data)
+    context = {}
+    forms = []
+    for st in StepType.objects.all():
+        forms.append(StepForm(step_type_id=st.pk))
+    context['forms'] = forms
 #    return render(request, 'flowapp/test_forms.html', context)
 
-    context = {}
-    step_types = StepType.objects.all()
-    context['step_types'] = step_types
+#    context = {}
+    context['step_types'] = StepType.objects.all()
     return render(request, 'flowapp/test_forms.html', context)
 
 
 def step_form(request):
-    step_type_id = request.POST.get("step_type_id")
-    print(step_type_id)
 
     if request.method == 'POST':
+        flow_id = request.POST.get("formData[flow]")
+        print(flow_id)
+        flow = Flow.objects.get(pk=flow_id)
+        print(flow)
+        order = request.POST.get("formData[order]")
+        url = request.POST.get("formData[url]")
+        passed = request.POST.get("formData[passed]")
+        if passed == 'false':
+            passed = False
+        elif passed == 'true':
+            passed = True
+        else:
+            passed = None
+        print(passed)
+        desired_result = request.POST.get("formData[desired_result]")
+        fixture = request.POST.get("formData[fixture]")
         #action = request.POST.get("action")
         #if action == "create":
-        form = StepForm(step_type_id, request.POST)
-        if form.is_valid():
-            desired_result = form.cleaned_data['desired_result']
-            fixture = form.cleaned_data['fixture']
-            passed = form.cleaned_data['passed']
-            url = form.cleaned_data['url']
-            flow = form.cleaned_data['flow']
-            # step_type = StepType.objects.get(pk=step_type_id)
-            step = Step.objects.create(flow=flow,
-                                       desired_result=desired_result,
-                                       fixture=fixture,
-                                       passed=passed,
-                                       url=url
-                                       )
-            step.save()
-            return HttpResponse("Cool")
-        else:
-            form = StepForm(step_type_id=step_type_id)
-            return HttpResponse(form.as_p())
-    else:
-        return render(request, 'flowapp/test_forms.html', {'form': form})
-
+        #form = StepForm(step_type_id, request.POST)
+        #if form.is_valid():
+         #   desired_result = form.cleaned_data['desired_result']
+          #  fixture = form.cleaned_data['fixture']
+           # passed = form.cleaned_data['passed']
+           # url = form.cleaned_data['url']
+           # flow = form.cleaned_data['flow']
+           # # step_type = StepType.objects.get(pk=step_type_id)
+        step = Step.objects.create(flow=flow,
+                                   desired_result=desired_result,
+                                   fixture=fixture,
+                                   passed=passed,
+                                   url=url
+                                   )
+        step.save()
+        return HttpResponse("Cool")
 
 
 def add_step(request):

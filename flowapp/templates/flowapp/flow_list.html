@@ -3,7 +3,6 @@
 {% block title %}{{ project.name }} | Testing Steps{% endblock %}
 {% block javascript %}
 <script>
-	import JSON
 	// Declare a callback function to be called every time a sortable
 	// is about to land in its new (or same) location
 	function my_ui_sort_before_stop_callback(event, ui) {
@@ -77,19 +76,16 @@
 	});
 </script>
 <script>
-	function getStepForm(form_id, div_id, step_type_id) {
+	function getStepForm(div_id, step_type_id) {
 		$.ajax({
-			type: 'POST',
-			url: 'http://127.0.0.1:8000/add-step/',
+			type: 'GET',
+			url: 'http://127.0.0.1:8000/step-form/',
 			data: {
 				"step_type_id": step_type_id,
-				"csrfmiddlewaretoken": '{{ csrf_token }}'
 			},
 		});
 		var x = document.getElementById(div_id)
 		x.style.display = "none";
-		var y = document.getElementById(form_id)
-		y.style.display = "block"
 		
 	}
 </script>
@@ -178,7 +174,7 @@
 				<div id="{{ step.id }}" class="step">
 					<!-- <input class="up" onclick="test('{{ step.id }}', 'up', {{ step.order }})" type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
 					<input class="down" onclick="test('{{ step.id }}', 'down', {{ step.order }})" type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15"> -->
-					{{ step.order }}: {{ step.type }} {{ step.item }}
+					{{ step.order }}: {{ step.step_type }} {{ step.url }}
 				</div>
 				{% if forloop.last %}
 					<div style="display:none;"></div>
@@ -190,11 +186,12 @@
 		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
 			<ul>
 				{% for step_type in step_types %}
-					<li onclick="getStepForm('{{ flow.id }}_form', 'Context_Menu_{{ flow.id }}', '{{ step_type.id }}')">{{ step_type }}</li>
+					<li><a href="/step-form/{{ step_type.id }}">{{ step_type.name }}</a></li>
 				{% endfor %}
 			</ul>
 		</div>
 		{% comment %}
+		 onclick="getStepForm('Context_Menu_{{ flow.id }}', '{{ step_type.id }}')"
 		<!--
 		<div id="{{ flow.id }}_form" style="dipslay:none">
 			<form action="/add-step/" method='post'>
