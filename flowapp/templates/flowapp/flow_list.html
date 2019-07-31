@@ -76,16 +76,22 @@
 	});
 </script>
 <script>
-	function getStepForm(div_id, step_type_id) {
+	function loadForm(form_id) {
+		console.log(form_id)
+		var x = document.getElementById(form_id)
+		<!-- x.document.innerHTML('{{ form.as_p }}')-->
+	}
+	function getStepForm(step_type_id, form_id) {
 		$.ajax({
 			type: 'GET',
 			url: 'http://127.0.0.1:8000/step-form/',
 			data: {
 				"step_type_id": step_type_id,
+				"pk": step_type_id,
 			},
+			success: loadForm(form_id)
 		});
-		var x = document.getElementById(div_id)
-		x.style.display = "none";
+		
 		
 	}
 </script>
@@ -186,9 +192,20 @@
 		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
 			<ul>
 				{% for step_type in step_types %}
-					<li><a href="/step-form/{{ step_type.id }}">{{ step_type.name }}</a></li>
+					<li onclick="getStepForm('{{ step_type.id }}', 
+					'{{ flow.id }}_form_item')">{{ step_type.name }}</li>
 				{% endfor %}
 			</ul>
+		</div>
+		<div id="{{ flow.id }}_form">
+			<form action="/#/" method="post" id="{{ flow.id }}_form_item">
+			{% csrf_token %}
+			{{ form }}
+			</form>
+			<button onclick="postStepForm('{{ flow.id }}_form_item')">
+				Submit
+			</button>
+		
 		</div>
 		{% comment %}
 		 onclick="getStepForm('Context_Menu_{{ flow.id }}', '{{ step_type.id }}')"

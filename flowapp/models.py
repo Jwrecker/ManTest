@@ -225,7 +225,7 @@ class StepType(models.Model):
 class Step(models.Model):
     id = models.CharField(primary_key=True, default=truncated_uuid, editable=False, max_length=8)
     #id = models.UUIDField(primary_key=True, default=uuid.uuid4.split('-')[0], editable=False, )
-    flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
+    flow = models.ForeignKey(Flow, on_delete=models.CASCADE, null=False)
     order = models.IntegerField(default=1)
     step_type = models.ForeignKey(StepType, on_delete=models.PROTECT)
     desired_result = models.CharField(max_length=500, blank=True, null=True)

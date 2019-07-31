@@ -12,7 +12,6 @@ urlpatterns = [
     path('test-forms/', views.test_step_forms, name='test'),
     path('get-step-form/', views.get_step_forms, name='get-form'),
     path('step-form/', views.step_form, name='step-form'),
-    path('step-form/<int:pk>', views.get_step_forms, name='step-form-get'
-    )
+    # path('step-form/<int:pk>', views.get_step_forms, name='step-form-get'
 ]
 

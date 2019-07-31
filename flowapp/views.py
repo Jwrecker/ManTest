@@ -84,11 +84,10 @@ def move_step(request):
         # TODO: Either have step_type in the form, and validate after to see if they did it correctly, or load a second form.
 
 
-
 def get_step_forms(request, pk):
     step_type_id = pk
     form = StepForm(step_type_id=step_type_id)
-    return render(request, 'flowapp/test_forms.html', {'form': form})
+    return HttpResponse(request, {'form': form, 'step_type_id': pk})
 
 
 def test_step_forms(request):
@@ -110,6 +109,9 @@ def test_step_forms(request):
 def step_form(request):
 
     if request.method == 'POST':
+        step_type_id = request.POST.get('step_type_id')
+        print(step_type_id)
+        step_type = StepType.objects.get(pk=step_type_id)
         flow_id = request.POST.get("formData[flow]")
         print(flow_id)
         flow = Flow.objects.get(pk=flow_id)
@@ -126,24 +128,57 @@ def step_form(request):
         print(passed)
         desired_result = request.POST.get("formData[desired_result]")
         fixture = request.POST.get("formData[fixture]")
-        #action = request.POST.get("action")
-        #if action == "create":
-        #form = StepForm(step_type_id, request.POST)
-        #if form.is_valid():
-         #   desired_result = form.cleaned_data['desired_result']
-          #  fixture = form.cleaned_data['fixture']
-           # passed = form.cleaned_data['passed']
-           # url = form.cleaned_data['url']
-           # flow = form.cleaned_data['flow']
-           # # step_type = StepType.objects.get(pk=step_type_id)
-        step = Step.objects.create(flow=flow,
-                                   desired_result=desired_result,
-                                   fixture=fixture,
-                                   passed=passed,
-                                   url=url
-                                   )
-        step.save()
-        return HttpResponse("Cool")
+        form = StepForm(step_type_id, initial={'flow': flow, 'order': order,
+                                               'url': url, 'passed': passed,
+                                               'desired_result': desired_result,
+                                               'fixture': fixture})
+        if form.is_valid():
+            step = Step.objects.create(flow=flow,
+                                       step_type=step_type,
+                                       desired_result=desired_result,
+                                       fixture=fixture,
+                                       passed=passed,
+                                       url=url
+                                       )
+            step.save()
+            context = {}
+
+        #
+        #
+        # #action = request.POST.get("action")
+        # #if action == "create":
+        #
+        # form = StepForm(step_type_id)
+        # if form.is_valid():
+        #  # desired_result = form.cleaned_data['desired_result']
+        #   #  fixture = form.cleaned_data['fixture']
+        #    # passed = form.cleaned_data['passed']
+        #    # url = form.cleaned_data['url']
+        #    # flow = form.cleaned_data['flow']
+        #    # # step_type = StepType.objects.get(pk=step_type_id)
+        #
+        #     step = Step.objects.create(flow=flow,
+        #                                step_type=step_type,
+        #                                desired_result=desired_result,
+        #                                fixture=fixture,
+        #                                passed=passed,
+        #                                url=url
+        #                                )
+        #     step.save()
+            return HttpResponse("Cool")
+        else:
+            return HttpResponse(str(form.as_p))
+    else:
+        # step_type_id = pk
+        step_type_id = request.GET.get('step_type_id')
+        print(step_type_id)
+        form = StepForm(step_type_id=step_type_id)
+        print(form)
+        #TODO: Just return RENDERED FORM HTML (NOT SURE IF CASTING AS A STRING IS NEEDED)
+        #return HttpResponse(form.as_p)
+        #return JsonResponse({"form": form.as_p, "step_type_id": step_type_id})
+        context = {'form': form, 'step_type_id': step_type_id}
+        return render(request, 'flowapp/flow_list.html', context)
 
 
 def add_step(request):
