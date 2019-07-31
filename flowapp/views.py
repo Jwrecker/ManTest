@@ -141,7 +141,6 @@ def step_form(request):
                                        url=url
                                        )
             step.save()
-            context = {}
 
         #
         #
@@ -174,11 +173,12 @@ def step_form(request):
         print(step_type_id)
         form = StepForm(step_type_id=step_type_id)
         print(form)
+        s_form = form.as_p()
+        print(s_form)
         #TODO: Just return RENDERED FORM HTML (NOT SURE IF CASTING AS A STRING IS NEEDED)
         #return HttpResponse(form.as_p)
         #return JsonResponse({"form": form.as_p, "step_type_id": step_type_id})
-        context = {'form': form, 'step_type_id': step_type_id}
-        return render(request, 'flowapp/flow_list.html', context)
+        return HttpResponse(str(s_form))
 
 
 def add_step(request):

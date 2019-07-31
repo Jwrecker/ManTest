@@ -1,6 +1,71 @@
 {% extends "flowapp/base.html" %}
 {% load static %}
 {% block title %}{{ project.name }} | Testing Steps{% endblock %}
+
+{% block content %}
+<style>
+	.sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+	.sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+	.sortable li span { position: absolute; margin-left: -1.3em; }
+	.connectedSortableSteps div { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+	.connectedSortableSteps div span { position: absolute; margin-left: -1.3em; }
+	.bold {font-weight:bold}
+</style>
+<h2>{{ project.name }}</h2>
+{% for flow in project.flow_set.all %}
+	<h3>{{ flow.name }}</h3>
+	<div class="flow_steps_{{ flow.id }}">
+		<div id="{{ flow.id }}" class="connectedSortableSteps">
+			{% for step in flow.step_set.all %}
+				<div id="{{ step.id }}" class="step">
+					<!-- <input class="up" onclick="test('{{ step.id }}', 'up', {{ step.order }})" type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
+					<input class="down" onclick="test('{{ step.id }}', 'down', {{ step.order }})" type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15"> -->
+					{{ step.order }}: {{ step.step_type }} {{ step.url }}
+				</div>
+				{% if forloop.last %}
+					<div style="display:none;"></div>
+				{% endif %}
+			{% endfor %}
+			<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
+					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
+		</div>
+		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
+			<ul>
+				{% for step_type in step_types %}
+					<li onclick="getStepForm('{{ step_type.id }}', 
+					'form')">{{ step_type.name }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		
+		{% comment %}
+		 onclick="getStepForm('Context_Menu_{{ flow.id }}', '{{ step_type.id }}')"
+		<!--
+		<div id="{{ flow.id }}_form" style="dipslay:none">
+			<form action="/add-step/" method='post'>
+				{% csrf_token %}
+				{{ form }}
+			<input type="Submit">
+			</form>
+		</div>
+		-->
+		{% endcomment %}
+		<br>
+	</div>
+{% endfor %}
+<div id="form_div">
+	<form action="/#/" method="post" id="form">
+	</form>
+	<button onclick="postStepForm('{{ flow.id }}_form_item')">
+		Submit
+	</button>
+		
+</div>
+
+<!--
+<script>document.getElementById("jst").innerHTML = getCookie('csrftoken') </script>
+-->
+{% endblock %}
 {% block javascript %}
 <script>
 	// Declare a callback function to be called every time a sortable
@@ -76,12 +141,8 @@
 	});
 </script>
 <script>
-	function loadForm(form_id) {
-		console.log(form_id)
-		var x = document.getElementById(form_id)
-		<!-- x.document.innerHTML('{{ form.as_p }}')-->
-	}
 	function getStepForm(step_type_id, form_id) {
+	var dialogForm;
 		$.ajax({
 			type: 'GET',
 			url: 'http://127.0.0.1:8000/step-form/',
@@ -89,11 +150,14 @@
 				"step_type_id": step_type_id,
 				"pk": step_type_id,
 			},
-			success: loadForm(form_id)
-		});
-		
-		
-	}
+		success: function (data) {
+			console.log("Got")
+			document.getElementById(form_id).innerHTML = data
+			dialog=$("#form_div").dialog({
+			});
+		}
+	});
+}
 </script>
 <script>
 	function popup_Menu(flow_id) {
@@ -161,69 +225,4 @@
 		});
 	}
 </script>
-{% endblock %}
-{% block content %}
-<style>
-	.sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
-	.sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
-	.sortable li span { position: absolute; margin-left: -1.3em; }
-	.connectedSortableSteps div { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
-	.connectedSortableSteps div span { position: absolute; margin-left: -1.3em; }
-	.bold {font-weight:bold}
-</style>
-<h2>{{ project.name }}</h2>
-{% for flow in project.flow_set.all %}
-	<h3>{{ flow.name }}</h3>
-	<div class="flow_steps_{{ flow.id }}">
-		<div id="{{ flow.id }}" class="connectedSortableSteps">
-			{% for step in flow.step_set.all %}
-				<div id="{{ step.id }}" class="step">
-					<!-- <input class="up" onclick="test('{{ step.id }}', 'up', {{ step.order }})" type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
-					<input class="down" onclick="test('{{ step.id }}', 'down', {{ step.order }})" type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15"> -->
-					{{ step.order }}: {{ step.step_type }} {{ step.url }}
-				</div>
-				{% if forloop.last %}
-					<div style="display:none;"></div>
-				{% endif %}
-			{% endfor %}
-			<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
-					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
-		</div>
-		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
-			<ul>
-				{% for step_type in step_types %}
-					<li onclick="getStepForm('{{ step_type.id }}', 
-					'{{ flow.id }}_form_item')">{{ step_type.name }}</li>
-				{% endfor %}
-			</ul>
-		</div>
-		<div id="{{ flow.id }}_form">
-			<form action="/#/" method="post" id="{{ flow.id }}_form_item">
-			{% csrf_token %}
-			{{ form }}
-			</form>
-			<button onclick="postStepForm('{{ flow.id }}_form_item')">
-				Submit
-			</button>
-		
-		</div>
-		{% comment %}
-		 onclick="getStepForm('Context_Menu_{{ flow.id }}', '{{ step_type.id }}')"
-		<!--
-		<div id="{{ flow.id }}_form" style="dipslay:none">
-			<form action="/add-step/" method='post'>
-				{% csrf_token %}
-				{{ form }}
-			<input type="Submit">
-			</form>
-		</div>
-		-->
-		{% endcomment %}
-		<br>
-	</div>
-{% endfor %}
-
-<!--
-<script>document.getElementById("jst").innerHTML = getCookie('csrftoken') </script>
--->
 {% endblock %}
