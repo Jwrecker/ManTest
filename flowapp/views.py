@@ -178,7 +178,10 @@ def step_form(request):
         #TODO: Just return RENDERED FORM HTML (NOT SURE IF CASTING AS A STRING IS NEEDED)
         #return HttpResponse(form.as_p)
         #return JsonResponse({"form": form.as_p, "step_type_id": step_type_id})
-        return HttpResponse(str(s_form))
+        response = HttpResponse(str(s_form))
+        # response['form'] = str(s_form)
+        # response['step_type_id'] = step_type_id
+        return response
 
 
 def add_step(request):
