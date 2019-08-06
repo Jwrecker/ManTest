@@ -178,3 +178,9 @@ div.flow {
 	border: 5px solid slategray;
 	margin: auto;
 }
+
+.dialog{
+	background-color: gray;
+	border: 10px solid lightslategray;
+	padding: 10px;
+}

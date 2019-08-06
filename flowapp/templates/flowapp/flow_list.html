@@ -72,13 +72,9 @@
 	// Declare a callback function to be called every time a sortable
 	// is about to land in its new (or same) location
 	function my_ui_sort_before_stop_callback(event, ui) {
-		function move_step_success_callback(data, status) {
-			console.log("--POSTED BABY--");
-			console.log(data);
-			console.log(status);
-			// TODO: Why doesn't this print?
-			console.log(data.old_flow_id)
-			// TODO: Use jQuery to update the indicated flow(s)
+		function move_step_success_callback(old_flow, new_flow) {
+			$("#"+old_flow).load(" #"+old_flow);
+			$("#"+new_flow).load(" #"+new_flow);
 		}
 		var moved_item_id = ui.item[0].id;
 		var target_flow_id = event.target.id;
@@ -101,7 +97,7 @@
 					"new_flow": new_parent_flow_id,
 					"csrfmiddlewaretoken": '{{ csrf_token }}'
 				},
-				success: move_step_success_callback,
+				success: move_step_success_callback(target_flow_id, new_parent_flow_id)
 			});
 		}
 		// If target and source are not the same, they must have moved flows
@@ -122,7 +118,7 @@
 					"new_flow": new_parent_flow_id,
 					"csrfmiddlewaretoken": '{{ csrf_token }}'
 				},
-				success: move_step_success_callback
+				success: move_step_success_callback(target_flow_id, new_parent_flow_id)
 			})
 		}
 	} 
@@ -156,14 +152,16 @@ function getFormData($form){
 function postStepForm(){
 		var $form = $("#form");
 		var formData = getFormData($form);
+		console.log(formData)
+		originalData = {
+					"csrfmiddlewaretoken": '{{ csrf_token }}',
+					"step_type_id": document.getElementById("step_type_id").innerHTML,
+		}
+		data = {...originalData, ...formData}
 		$.ajax({
 				type: 'POST',
 				url: 'http://127.0.0.1:8000/step-form/',
-				data: {
-					"csrfmiddlewaretoken": '{{ csrf_token }}',
-					"step_type_id": document.getElementById("step_type_id").innerHTML,
-					formData: formData,
-					},
+				data: data
 		});
 }
 </script>

@@ -109,16 +109,20 @@ def test_step_forms(request):
 def step_form(request):
 
     if request.method == 'POST':
+        print(request.POST)
+        formdata = request.POST
+        print(formdata)
+
         step_type_id = request.POST.get('step_type_id')
         print(step_type_id)
         step_type = StepType.objects.get(pk=step_type_id)
-        flow_id = request.POST.get("formData[flow]")
+        flow_id = request.POST.get("flow")
         print(flow_id)
         flow = Flow.objects.get(pk=flow_id)
         print(flow)
-        order = request.POST.get("formData[order]")
-        url = request.POST.get("formData[url]")
-        passed = request.POST.get("formData[passed]")
+        order = request.POST.get("order")
+        url = request.POST.get("url")
+        passed = request.POST.get("passed")
         if passed == 'false':
             passed = False
         elif passed == 'true':
@@ -126,21 +130,19 @@ def step_form(request):
         else:
             passed = None
         print(passed)
-        desired_result = request.POST.get("formData[desired_result]")
-        fixture = request.POST.get("formData[fixture]")
-        form = StepForm(step_type_id, initial={'flow': flow, 'order': order,
-                                               'url': url, 'passed': passed,
-                                               'desired_result': desired_result,
-                                               'fixture': fixture})
+        desired_result = request.POST.get("desired_result")
+        fixture = request.POST.get("fixture")
+        form = StepForm(step_type_id, request.POST)
+        print(form)
+
         if form.is_valid():
-            step = Step.objects.create(flow=flow,
+            Step.objects.create(flow=flow,
                                        step_type=step_type,
                                        desired_result=desired_result,
                                        fixture=fixture,
                                        passed=passed,
                                        url=url
                                        )
-            step.save()
 
         #
         #
@@ -164,9 +166,11 @@ def step_form(request):
         #                                url=url
         #                                )
         #     step.save()
+            print("Cool")
             return HttpResponse("Cool")
         else:
-            return HttpResponse(str(form.as_p))
+            print("Not Cool")
+            return HttpResponse("Not Cool")
     else:
         # step_type_id = pk
         step_type_id = request.GET.get('step_type_id')
