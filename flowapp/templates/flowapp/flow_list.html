@@ -18,8 +18,6 @@
 		<div id="{{ flow.id }}" class="connectedSortableSteps">
 			{% for step in flow.step_set.all %}
 				<div id="{{ step.id }}" class="step">
-					<!-- <input class="up" onclick="test('{{ step.id }}', 'up', {{ step.order }})" type="image" src="{% static '/flowapp/images/up.png' %}" alt="Up" width="15" height="15">
-					<input class="down" onclick="test('{{ step.id }}', 'down', {{ step.order }})" type="image" src="{% static '/flowapp/images/down.png' %}" alt="Down" width="15" height="15"> -->
 					{{ step.order }}: {{ step.step_type }} {{ step.url }}
 				</div>
 				{% if forloop.last %}
@@ -71,10 +69,20 @@
 <script>
 	// Declare a callback function to be called every time a sortable
 	// is about to land in its new (or same) location
+	var oldFlow;
+	var newFlow;
 	function my_ui_sort_before_stop_callback(event, ui) {
-		function move_step_success_callback(old_flow, new_flow) {
-			$("#"+old_flow).load(" #"+old_flow);
-			$("#"+new_flow).load(" #"+new_flow);
+		function move_step_success_callback(o, n) {
+			// $("#"+old_flow).load(" #"+old_flow);
+			console.log("");
+			console.log("DEBUGGING SUCCESS CALLBACK");
+			console.log(o)
+			console.log(n)
+			oldFlow = o;
+			newFlow = n;
+			console.log(oldFlow)
+			console.log(newFlow)
+			//$("#"+new_flow).load(" #"+new_flow);
 		}
 		var moved_item_id = ui.item[0].id;
 		var target_flow_id = event.target.id;
@@ -83,6 +91,9 @@
 		// It only counts as a move within the flow if the target and source are the same.
 		if (target_flow_id == new_parent_flow_id) {
 			console.log("");
+			console.log("DEBUGGING MOVE SUCCESS");
+			console.log(target_flow_id)
+			console.log(new_parent_flow_id)
 			console.log("-- STEP SORTED WITHIN FLOW --");
 			console.log("Step ID: " + moved_item_id);
 			console.log("FLOW ID: " + new_parent_flow_id);
@@ -97,6 +108,7 @@
 					"new_flow": new_parent_flow_id,
 					"csrfmiddlewaretoken": '{{ csrf_token }}'
 				},
+				//success: move_step_success_callback
 				success: move_step_success_callback(target_flow_id, new_parent_flow_id)
 			});
 		}
@@ -121,7 +133,16 @@
 				success: move_step_success_callback(target_flow_id, new_parent_flow_id)
 			})
 		}
+	}
+	
+	function my_ui_update_callback(event, ui)
+	{
+		console.log("DEBUGGING MOVE UPDATE CALLBACK");
+		console.log(oldFlow)
+		console.log(newFlow)
+		// TODO: Refresh each unique flow by hitting get_flow_html(flow_id) (selector.load)
 	} 
+	 
 	// Make the ordered list steps sortable
 	$( function() {
 		$( " #ol_flow_1_b8e2a961 " ).sortable({
@@ -133,7 +154,8 @@
 	$( function() {
 		$( "{% for flow in project.flow_set.all %}#{{ flow.id }}, {% if forloop.last %} #{{flow.id}} {% endif %}{% endfor %}" ).sortable({
 			beforeStop: my_ui_sort_before_stop_callback,
-			connectWith: ".connectedSortableSteps"
+			update: my_ui_update_callback,
+			connectWith: ".connectedSortableSteps",
 		}).disableSelection();
 	});
 </script>

@@ -1,0 +1,10 @@
+<div id="{{ step.id }}" class="step">
+{{ step.order }}
+{{ step.step_type }} 
+{{ step.url }}
+{% if step.step_type.has_verification == "A" or "R" %}
+{{ step.passed }}
+{{ step.desired_result }}
+{% elif step.step_type.has_fixture == "A" or "R" %}
+{{ step.fixture }}
+</div>
