@@ -6,6 +6,8 @@
 				{% include "flowapp/get_step.html"%}
 			{% endfor %}
 		</div>
+		
+		{% comment %}
 			<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
 					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
 		</div>
@@ -19,3 +21,4 @@
 		</div>
 		<br>
 	</div>
+	{% endcomment %}

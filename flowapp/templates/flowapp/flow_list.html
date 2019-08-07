@@ -13,7 +13,22 @@
 </style>
 <h2>{{ project.name }}</h2>
 {% for flow in project.flow_set.all %}
+	<div id="{{ flow.id }}_load_selector">
 	{% include 'flowapp/get_flow.html' %}
+	</div>
+		<br>
+	</div>
+	<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
+					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
+		</div>
+		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
+			<ul>
+				{% for step_type in step_types %}
+					<li onclick="getStepForm('{{ step_type.id }}', 
+					'form', 'Context_Menu_{{ flow.id }}')">{{ step_type.name }}</li>
+				{% endfor %}
+			</ul>
+		</div>
 		<br>
 	</div>
 {% endfor %}
@@ -126,6 +141,19 @@
 	});
 </script>
 <script>
+function update_flow_function(flow_id) {
+		console.log(flow_id)
+		$.ajax ({
+			type: 'GET',
+			url: '/get-flow/',
+			data: {
+				"flow_id": flow_id
+				},
+			success: function (data) {
+				document.getElementById(flow_id+"_load_selector").innerHTML = data
+			}
+		});
+}
 function getFormData($form){
 		var unindexed_array = $form.serializeArray();
 		var indexed_array = {};
@@ -149,7 +177,21 @@ function postStepForm(){
 		$.ajax({
 				type: 'POST',
 				url: 'http://127.0.0.1:8000/step-form/',
-				data: data
+				data: data,
+				success: function (data) {
+					var data = data
+					console.log(data)
+					var status = data['status']
+					var form = data['form']
+					console.log(status)
+					if (status == "Failed"){
+						document.getElementById('form').innerHTML = form
+						}
+					else {
+					$('#form_div').dialog('close');
+					update_flow_function(data);
+					}
+					}
 		});
 }
 </script>
@@ -207,6 +249,11 @@ function postStepForm(){
 			success: insert_post_success_callback,
 		});
 	}
+</script>
+<script>
+	
+
+
 </script>
 <script>
 	function test(step_id, direction, original_order) {

@@ -122,14 +122,18 @@ def step_form(request):
         print(formdata)
 
         step_type_id = request.POST.get('step_type_id')
-        print(step_type_id)
         step_type = StepType.objects.get(pk=step_type_id)
         flow_id = request.POST.get("flow")
-        print(flow_id)
+
+        # if flow_id is None:
+        #     raise FlowRequiredError
         flow = Flow.objects.get(pk=flow_id)
-        print(flow)
         order = request.POST.get("order")
         url = request.POST.get("url")
+        # if step_type.url_validation == "R" and url is None:
+        #     raise URLRequiredError
+        # if url:
+
         passed = request.POST.get("passed")
         if passed == 'false':
             passed = False
@@ -175,10 +179,13 @@ def step_form(request):
         #                                )
         #     step.save()
             print("Cool")
-            return HttpResponse("Cool")
+            return HttpResponse(flow.id)
         else:
-            print("Not Cool")
-            return HttpResponse("Not Cool")
+            print("++++++++++++++++++++++++++++++++++++++++FORM FAILED VALIDATION======================================================")
+            print(form)
+            # return render(request, 'flowapp/step_form.html', {'form': form, 'status': "Failed"})
+            json_data = {"form": str(form.as_p()), "status": "Failed"}
+            return JsonResponse(json_data)
     else:
         # step_type_id = pk
         step_type_id = request.GET.get('step_type_id')
