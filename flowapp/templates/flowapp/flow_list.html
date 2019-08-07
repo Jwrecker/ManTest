@@ -18,7 +18,7 @@
 	</div>
 		<br>
 	</div>
-	<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
+	<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.png' %}"
 					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
 		</div>
 		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
@@ -207,7 +207,7 @@ function postStepForm(){
 			},
 		success: function (data) {
 			console.log("Got")
-			popup_Menu(menu_id)
+			$('#'+menu_id).dialog('close');
 			document.getElementById(form_id).innerHTML = data
 			document.getElementById("step_type_id").innerHTML = step_type_id
 			dialog=$("#form_div").dialog({
@@ -218,13 +218,9 @@ function postStepForm(){
 </script>
 <script>
 	function popup_Menu(flow_id) {
-		var x = document.getElementById(flow_id);
-		if (x.style.display === "none") {
-			x.style.display = "block";
-		} else {
-			x.style.display = "none";
+		dialog=$("#"+flow_id).dialog({
+			});
 		}
-	}
 </script>
 <script>
 	function showFunction(button_id) {
