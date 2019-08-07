@@ -13,45 +13,11 @@
 </style>
 <h2>{{ project.name }}</h2>
 {% for flow in project.flow_set.all %}
-	<h3>{{ flow.name }}</h3>
-	<div class="flow_steps_{{ flow.id }}">
-		<div id="{{ flow.id }}" class="connectedSortableSteps">
-			{% for step in flow.step_set.all %}
-				<div id="{{ step.id }}" class="step">
-					{{ step.order }}: {{ step.step_type }} {{ step.url }}
-				</div>
-				{% if forloop.last %}
-					<div style="display:none;"></div>
-				{% endif %}
-			{% endfor %}
-			<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
-					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
-		</div>
-		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
-			<ul>
-				{% for step_type in step_types %}
-					<li onclick="getStepForm('{{ step_type.id }}', 
-					'form')">{{ step_type.name }}</li>
-				{% endfor %}
-			</ul>
-		</div>
-		
-		{% comment %}
-		 onclick="getStepForm('Context_Menu_{{ flow.id }}', '{{ step_type.id }}')"
-		<!--
-		<div id="{{ flow.id }}_form" style="dipslay:none">
-			<form action="/add-step/" method='post'>
-				{% csrf_token %}
-				{{ form }}
-			<input type="Submit">
-			</form>
-		</div>
-		-->
-		{% endcomment %}
+	{% include 'flowapp/get_flow.html' %}
 		<br>
 	</div>
 {% endfor %}
-<div id="form_div">
+<div id="form_div" style="display:none;">
 	<form action="/#/" method="post" id="form">
 	</form>
 	<button onclick="postStepForm()">
@@ -188,7 +154,7 @@ function postStepForm(){
 }
 </script>
 <script>
-	function getStepForm(step_type_id, form_id) {
+	function getStepForm(step_type_id, form_id, menu_id) {
 	var dialogForm;
 		$.ajax({
 			type: 'GET',
@@ -199,6 +165,7 @@ function postStepForm(){
 			},
 		success: function (data) {
 			console.log("Got")
+			popup_Menu(menu_id)
 			document.getElementById(form_id).innerHTML = data
 			document.getElementById("step_type_id").innerHTML = step_type_id
 			dialog=$("#form_div").dialog({

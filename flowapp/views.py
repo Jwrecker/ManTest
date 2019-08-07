@@ -84,10 +84,18 @@ def move_step(request):
         # TODO: Either have step_type in the form, and validate after to see if they did it correctly, or load a second form.
 
 
-def get_step_forms(request, pk):
-    step_type_id = pk
-    form = StepForm(step_type_id=step_type_id)
-    return HttpResponse(request, {'form': form, 'step_type_id': pk})
+def get_steps(request):
+    step_id = request.GET.get("step_id")
+    step = Step.objects.get(pk=step_id)
+    flow = step.flow
+    for st in flow.step_set.all():
+        return render(request, 'flowapp/get_step.html', {'step': st})
+
+
+def get_flow(request):
+    flow_id = request.GET.get("flow_id")
+    flow = Flow.objects.get(pk=flow_id)
+    return render(request, 'flowapp/get_flow.html', {'flow': flow})
 
 
 def test_step_forms(request):
@@ -137,12 +145,12 @@ def step_form(request):
 
         if form.is_valid():
             Step.objects.create(flow=flow,
-                                       step_type=step_type,
-                                       desired_result=desired_result,
-                                       fixture=fixture,
-                                       passed=passed,
-                                       url=url
-                                       )
+                                step_type=step_type,
+                                desired_result=desired_result,
+                                fixture=fixture,
+                                passed=passed,
+                                url=url
+                                )
 
         #
         #

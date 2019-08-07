@@ -10,7 +10,8 @@ urlpatterns = [
     path('move-step/', views.move_step, name='move-step'),
     path('add-step/', views.add_step, name='add-step'),
     path('test-forms/', views.test_step_forms, name='test'),
-    path('get-step-form/', views.get_step_forms, name='get-form'),
+    path('get-steps/', views.get_steps, name='get-steps'),
+    path('get-flow/', views.get_flow, name='get_flow'),
     path('step-form/', views.step_form, name='step-form'),
     # path('step-form/<int:pk>', views.get_step_forms, name='step-form-get'
 ]

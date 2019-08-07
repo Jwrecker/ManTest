@@ -1,12 +1,11 @@
+{% load static %}
 <h3>{{ flow.name }}</h3>
 	<div class="flow_steps_{{ flow.id }}">
 		<div id="{{ flow.id }}" class="connectedSortableSteps">
 			{% for step in flow.step_set.all %}
-				{% include "get_step.html"%}
-				{% if forloop.last %}
-					<div style="display:none;"></div>
-				{% endif %}
+				{% include "flowapp/get_step.html"%}
 			{% endfor %}
+		</div>
 			<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
 					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
 		</div>
@@ -14,7 +13,7 @@
 			<ul>
 				{% for step_type in step_types %}
 					<li onclick="getStepForm('{{ step_type.id }}', 
-					'form')">{{ step_type.name }}</li>
+					'form', 'Context_Menu_{{ flow.id }}')">{{ step_type.name }}</li>
 				{% endfor %}
 			</ul>
 		</div>

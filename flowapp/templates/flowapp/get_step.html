@@ -1,10 +1,17 @@
+{% load static %}
 <div id="{{ step.id }}" class="step">
-{{ step.order }}
-{{ step.step_type }} 
-{{ step.url }}
-{% if step.step_type.has_verification == "A" or "R" %}
-{{ step.passed }}
-{{ step.desired_result }}
-{% elif step.step_type.has_fixture == "A" or "R" %}
-{{ step.fixture }}
+<!-- {{ step.order }} -->
+{{ step.step_type }}
+{% if step.url %}
+URL: <a href="{{ step.url }}">{{ step.url }}</a>
+{% endif %}
+{% if step.passed %}
+Complete: {{ step.passed }}
+{% endif %}
+{% if step.desired_result %}
+Goal: {{ step.desired_result }}
+{% endif %}
+{% if step.fixture %}
+Fixture: {{ step.fixture }}
+{% endif %}
 </div>
