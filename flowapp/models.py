@@ -57,42 +57,48 @@ class Project(models.Model):
 
 
 class FlowManager(models.Manager):
-    def move(self, obj, new_order):
-        # TODO COPY STUFF FROM STEP
-        """ Move an object to a new order position """
+    def move(self, obj, new_order,):
+        """ Move an object to a new order position (potentially in a new flow) """
 
-        qs = self.get_queryset()
         if new_order is None:
             raise NoOrderError
         if new_order < 1:
             raise PositionTooLowError
-        elif new_order > qs.filter(project=obj.project).count() + 1:
+        qs = self.get_queryset()
+        if new_order > qs.filter(project=obj.project).count() + 2:
             raise PositionTooHighError
-        else:
-            with transaction.atomic():
-                if obj.order > int(new_order):
-                    qs.filter(
-                        project=obj.project, order__lt=obj.order, order__gte=new_order
-                    ).exclude(pk=obj.pk).update(order=F("order") + 1)
-                else:
-                    qs.filter(
-                        project=obj.project, order__lte=new_order, order__gt=obj.order
-                    ).exclude(pk=obj.pk).update(order=F("order") - 1)
 
-                obj.order = new_order
-                obj.save()
+            # Moving position within a flow
+        with transaction.atomic():
+            # If you are moving the step to a lower position (closer to 1) ...
+            if obj.order > int(new_order):
+                # ... take everything in between the old position and the new position and move them up one
+                qs.filter(
+                    project=obj.project, order__lt=obj.order, order__gte=new_order
+                ).exclude(pk=obj.pk).update(order=F("order") + 1)
+            # ... but if you're moving the step to higher position (or staying the same)
+            else:
+                # ... lower the position of any step in between the old position and the new position
+                qs.filter(
+                    project=obj.project, order__lte=new_order, order__gt=obj.order
+                ).exclude(pk=obj.pk).update(order=F("order") - 1)
+            # ... and save the new position
+            obj.order = new_order
+            obj.save()
 
     def create(self, **kwargs):
         instance = self.model(**kwargs)
 
         with transaction.atomic():
+            # Get our current max order number
             results = self.filter(
                 project=instance.project
             ).aggregate(
                 Max('order')
             )
 
-            current_order = results['order__max'] + 1
+            # Increment and use it for our new object
+            current_order = results['order__max']
             if current_order is None:
                 current_order = 0
 
@@ -152,7 +158,6 @@ class StepManager(models.Manager):
                 obj.order = new_order
                 obj.save()
         else:
-            # TODO Copy crap into here and fix
             # Moving position between flows
             with transaction.atomic():
                 qs.filter(

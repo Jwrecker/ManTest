@@ -144,7 +144,7 @@ function FlowChange(direction, flow_id) {
 			"csrfmiddlewaretoken": '{{ csrf_token }}',
 			'direction': direction
 			},
-		success: update_project_function(flow_id)
+		success: update_project_function
 	});
 }
 function update_flow_function(flow_id) {

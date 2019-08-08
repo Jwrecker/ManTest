@@ -88,7 +88,7 @@ def move_flow(request):
         Flow.objects.move(flow, order)
     else:
         raise IncorrectDirectionError
-    return HttpResponse("Cool")
+    return HttpResponse(flow_id)
 
 
 def get_steps(request):
