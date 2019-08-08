@@ -66,6 +66,7 @@ def move_step(request):
     old_flow_id = request.POST["old_flow"]
     new_flow_id = request.POST["new_flow"]
     pk = request.POST["step_pk"]
+    print(Flow.objects.all())
     order = int(request.POST["new_list_position"])
     old_flow = Flow.objects.get(pk=old_flow_id)
     new_flow = Flow.objects.get(pk=new_flow_id)
@@ -74,14 +75,20 @@ def move_step(request):
     json_data = {"old_flow_id": old_flow_id, "new_flow_id": new_flow_id}
     return JsonResponse(json_data)
 
-#def get_step_type(request):
-#    if request.method == 'POST':
-#
-#        form = StepTypeForm
-#
-#        if form.is_valid():
-#            step_type = form.cleaned_data['step_type']
-        # TODO: Either have step_type in the form, and validate after to see if they did it correctly, or load a second form.
+@require_POST
+def move_flow(request):
+    flow_id = request.POST['flow_id']
+    direction = request.POST['direction']
+    flow = Flow.objects.get(pk=flow_id)
+    if direction == "up":
+        order = flow.order - 1
+        Flow.objects.move(flow, order)
+    elif direction == "down":
+        order = flow.order + 1
+        Flow.objects.move(flow, order)
+    else:
+        raise IncorrectDirectionError
+    return HttpResponse("Cool")
 
 
 def get_steps(request):
@@ -90,6 +97,13 @@ def get_steps(request):
     flow = step.flow
     for st in flow.step_set.all():
         return render(request, 'flowapp/get_step.html', {'step': st})
+
+
+def get_flows(request):
+    flow_id = request.GET.get("flow_id")
+    flow = Flow.objects.get(pk=flow_id)
+    project = flow.project
+    return render(request, 'flowapp/flows.html', {'project': project})
 
 
 def get_flow(request):

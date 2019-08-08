@@ -184,3 +184,13 @@ div.flow {
 	border: 10px solid lightslategray;
 	padding: 10px;
 }
+
+.per_flow_div {
+	background-color: dimgray;
+	border: 5px solid darkslategray;
+	padding: 10px;
+}
+
+.move-button {
+	float: right;
+	}

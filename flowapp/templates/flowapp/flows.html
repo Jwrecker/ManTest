@@ -1,0 +1,23 @@
+{% load static %}
+
+{% for flow in project.flow_set.all %}
+<div class="per_flow_div">
+	<div id="{{ flow.id }}_load_selector">
+		{% include 'flowapp/get_flow.html' %}
+	</div>
+		<br>
+	<input type="image" src="{% static '/flowapp/images/add.png' %}"
+					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
+		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
+			<ul>
+				{% for step_type in step_types %}
+					<li onclick="getStepForm('{{ step_type.id }}', 
+					'form', 'Context_Menu_{{ flow.id }}')">{{ step_type.name }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		<br>
+	</div>
+
+
+{% endfor %}

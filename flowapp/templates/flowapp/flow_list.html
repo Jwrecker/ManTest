@@ -12,26 +12,9 @@
 	.bold {font-weight:bold}
 </style>
 <h2>{{ project.name }}</h2>
-{% for flow in project.flow_set.all %}
-	<div id="{{ flow.id }}_load_selector">
-	{% include 'flowapp/get_flow.html' %}
-	</div>
-		<br>
-	</div>
-	<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.png' %}"
-					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">
-		</div>
-		<div id="Context_Menu_{{ flow.id }}" style="display:none;">
-			<ul>
-				{% for step_type in step_types %}
-					<li onclick="getStepForm('{{ step_type.id }}', 
-					'form', 'Context_Menu_{{ flow.id }}')">{{ step_type.name }}</li>
-				{% endfor %}
-			</ul>
-		</div>
-		<br>
-	</div>
-{% endfor %}
+<div id="flows">
+{% include 'flowapp/flows.html' %}
+</div>
 <div id="form_div" style="display:none;">
 	<form action="/#/" method="post" id="form">
 	</form>
@@ -141,6 +124,29 @@
 	});
 </script>
 <script>
+function update_project_function(flow_id) {
+	$.ajax ({
+		type: 'GET',
+		url: '/get-flows/',
+		data: {'flow_id': flow_id},
+		success: function (data) {
+			console.log(data)
+			document.getElementById("flows").innerHTML = data
+		}
+		});
+	}
+function FlowChange(direction, flow_id) {
+	$.ajax ({
+		type: 'POST',
+		url:'/move-flow/',
+		data: {
+			'flow_id': flow_id,
+			"csrfmiddlewaretoken": '{{ csrf_token }}',
+			'direction': direction
+			},
+		success: update_project_function(flow_id)
+	});
+}
 function update_flow_function(flow_id) {
 		console.log(flow_id)
 		$.ajax ({

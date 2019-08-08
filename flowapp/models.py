@@ -110,6 +110,9 @@ class Flow(models.Model):
     passed = models.BooleanField(default=False)
     order = models.IntegerField(default=1)
 
+    class Meta:
+        ordering = ['order']
+
     objects = FlowManager()
 
     def __str__(self):
@@ -246,7 +249,6 @@ class Step(models.Model):
         #return str(self.flow.project) + str(self.flow) + " Step" + str(self.order)
 
     class Meta:
-        index_together = ('flow', 'order')
         ordering = ['order']
 
 

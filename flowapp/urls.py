@@ -13,6 +13,8 @@ urlpatterns = [
     path('get-steps/', views.get_steps, name='get-steps'),
     path('get-flow/', views.get_flow, name='get_flow'),
     path('step-form/', views.step_form, name='step-form'),
+    path('move-flow/', views.move_flow, name='move-flow'),
+    path('get-flows/', views.get_flows, name='get-flows'),
     # path('step-form/<int:pk>', views.get_step_forms, name='step-form-get'
 ]
 
