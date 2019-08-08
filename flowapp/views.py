@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.views import generic
 from django.utils import timezone
 from django.urls import reverse
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt, requires_csrf_token
 from rest_framework import viewsets
@@ -89,6 +89,23 @@ def move_flow(request):
     else:
         raise IncorrectDirectionError
     return HttpResponse(flow_id)
+
+
+def project_form(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        form = ProjectForm(request.POST)
+
+        if form.is_valid():
+            p = Project(name=name)
+            p.save()
+            return HttpResponse('Cool')
+        else:
+            return render(request, 'flowapp/project_form.html', {'form': form, 'status': "Failed"})
+
+    else:
+        form = ProjectForm()
+        return render(request, 'flowapp/project_form.html', {'form': form})
 
 
 def get_steps(request):

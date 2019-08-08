@@ -6,6 +6,11 @@ from django.utils import timezone
 from .models import StepType, Project, Flow, Step
 
 
+class ProjectForm(ModelForm):
+    model = Project
+    fields = ['name',]
+
+
 class StepForm(ModelForm):
 
     class Meta:

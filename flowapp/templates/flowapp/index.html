@@ -1,5 +1,65 @@
 {% extends "flowapp/base.html" %}
 
+{% block javascript %}
+<script>
+function getProjectForm() {
+	$.ajax ({
+		type: 'GET',
+		url: '/project-form/',
+		success: function (data) {
+			document.getElementById("form").innerHTML = data
+		}
+		});
+	dialog=$("#form_div").dialog({
+		});
+}
+
+function update_page_function(data) {
+	console.log(data);
+	document.location.reload();
+}
+
+function getFormData($form){
+		var unindexed_array = $form.serializeArray();
+		var indexed_array = {};
+		
+		$.map(unindexed_array, function(n, i){
+			indexed_array[n['name']] = n['value'];
+		});
+		
+		return indexed_array;
+	}
+	
+function postForm(){
+		var $form = $("#form");
+		var formData = getFormData($form);
+		console.log(formData)
+		originalData = {
+					"csrfmiddlewaretoken": '{{ csrf_token }}',
+		}
+		data = {...originalData, ...formData}
+		$.ajax({
+				type: 'POST',
+				url: '/project-form/',
+				data: data,
+				success: function (data) {
+					var data = data
+					var status = data['status']
+					var form = data['form']
+					console.log(status)
+					if (status == "Failed"){
+						document.getElementById('form').innerHTML = form
+						}
+					else {
+					$('#form_div').dialog('close');
+					update_page_function(data);
+					}
+					}
+		});
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <ul class="main center">
 {% for project in main %}
@@ -8,5 +68,11 @@
 {% endfor %}
 </ul>
 
-<a href="/add-project">Add a Project</a>
+<button onclick="getProjectForm()">Add a Project</button>
+
+<div id="form_div" style="display:none;">
+	<form action="/project-form/" method="post" id="form">
+	</form>	
+	<input type="submit" onclick="postForm()">	
+</div>
 {% endblock %}
