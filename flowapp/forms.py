@@ -11,13 +11,16 @@ class ProjectForm(ModelForm):
     fields = ['name',]
 
 
+class FlowForm(ModelForm):
+    model = Flow
+    fields = ['name', 'passed', 'order']
+
+
 class StepForm(ModelForm):
 
     class Meta:
         model = Step
         fields = ['flow', 'order', 'url', 'passed', 'desired_result', 'fixture']
-
-
 
     def __init__(self, step_type_id, *args, **kwargs):
         super().__init__(*args, **kwargs)

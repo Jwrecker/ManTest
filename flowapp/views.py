@@ -234,6 +234,38 @@ def step_form(request):
         return response
 
 
+def flow_form(request):
+
+    if request.method == 'POST':
+
+        project_id = request.POST.get('project_id')
+        project = Project.objects.get(pk=project_id)
+
+        passed = request.POST.get("passed")
+        if passed == 'false':
+            passed = False
+        elif passed == 'true':
+            passed = True
+        else:
+            passed = None
+        print(passed)
+        name = request.POST.get("name")
+        form = FlowForm(request.POST)
+
+        if form.is_valid():
+            Flow.objects.create(name=name, passed=passed, project=project)
+            print("Cool")
+            return HttpResponse(project.id)
+        else:
+            json_data = {"form": str(form.as_p()), "status": "Failed"}
+            return JsonResponse(json_data)
+    else:
+        form = FlowForm()
+        form = form.as_p()
+        response = HttpResponse(str(form))
+        return response
+
+
 def add_step(request):
     if request.method == 'POST':
         step_type_id = request.POST.get("step_type_id")
