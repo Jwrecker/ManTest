@@ -194,3 +194,8 @@ div.flow {
 .move-button {
 	float: right;
 	}
+
+.step-input {
+	float: right;
+	padding: 2px;
+}

@@ -1,5 +1,16 @@
 {% load static %}
-<h3>{{ flow.name }} <input type="image" class="move-button" onclick="FlowChange('up', '{{ flow.id }}')" src="{% static 'flowapp/images/up.png' %}" height="20" width="20"> <input type="image" class="move-button" onclick="FlowChange('down', '{{ flow.id }}')" src="{% static 'flowapp/images/down.png' %}" height="20" width="20"></h3>
+<h3>{{ flow.name }} 
+{% if forloop.last %}
+
+{% else %}
+<input type="image" class="move-button" onclick="FlowChange('down', '{{ flow.id }}')" src="{% static 'flowapp/images/down.png' %}" height="20" width="20">
+{% endif %}
+{% if forloop.first %}
+
+{% else %}
+<input type="image" class="move-button" onclick="FlowChange('up', '{{ flow.id }}')" src="{% static 'flowapp/images/up.png' %}" height="20" width="20"> 
+{% endif %}
+</h3>
 <div class="flow_steps_{{ flow.id }}">
 	<div id="{{ flow.id }}" class="connectedSortableSteps">
 		{% for step in flow.step_set.all %}
@@ -7,6 +18,9 @@
 		{% endfor %}
 	</div>
 </div>
+
+
+
 		{% comment %}
 			<input id="{{ flow.id }}_add" type="image" class="hidden" src="{% static '/flowapp/images/add.jpeg' %}"
 					onclick="popup_Menu('Context_Menu_{{ flow.id }}')" alt="Add" Height="40" Width="40">

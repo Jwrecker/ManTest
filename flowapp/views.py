@@ -88,7 +88,7 @@ def move_flow(request):
         Flow.objects.move(flow, order)
     else:
         raise IncorrectDirectionError
-    return HttpResponse(flow_id)
+    return HttpResponse(flow.project.id)
 
 
 def project_form(request):
@@ -117,10 +117,10 @@ def get_steps(request):
 
 
 def get_flows(request):
-    flow_id = request.GET.get("flow_id")
-    flow = Flow.objects.get(pk=flow_id)
-    project = flow.project
-    return render(request, 'flowapp/flows.html', {'project': project})
+    project_id = request.GET.get("project_id")
+    project = Project.objects.get(pk=project_id)
+    step_types = StepType.objects.all()
+    return render(request, 'flowapp/flows.html', {'project': project, 'step_types': step_types})
 
 
 def get_flow(request):
@@ -143,6 +143,62 @@ def test_step_forms(request):
 #    context = {}
     context['step_types'] = StepType.objects.all()
     return render(request, 'flowapp/test_forms.html', context)
+
+
+@require_POST
+def delete_step(request):
+    step_id = request.POST['step_id']
+    step = Step.objects.get(pk=step_id)
+    Step.objects.remove(step)
+    return HttpResponse(step.flow.id)
+
+
+def edit_step(request):
+
+    if request.method == 'POST':
+        step_id = request.POST.get("step_id")
+        print(step_id)
+        step = Step.objects.get(id=step_id)
+        order = step.order
+        flow = step.flow
+        step_type = step.step_type
+        step_type_id = step.step_type.id
+        url = request.POST.get("url")
+        passed = request.POST.get("passed")
+        if passed == 'false':
+            passed = False
+        elif passed == 'true':
+            passed = True
+        else:
+            passed = None
+        desired_result = request.POST.get("desired_result")
+        fixture = request.POST.get("fixture")
+        form = StepForm(step_type_id, request.POST)
+        if form.is_valid():
+            Step.objects.remove(step)
+            step = Step.objects.create(flow=flow,
+                                       step_type=step_type,
+                                       desired_result=desired_result,
+                                       fixture=fixture,
+                                       passed=passed,
+                                       url=url
+                                       )
+            Step.objects.move(step, order, flow, flow)
+            return HttpResponse(flow.id)
+        else:
+            json_data = {"form": str(form.as_p()), "status": "Failed"}
+            return JsonResponse(json_data)
+    else:
+        step_id = request.GET.get('step_id')
+        step = Step.objects.get(pk=step_id)
+        step_type_id = step.step_type.id
+        form = StepForm(step_type_id, initial={'flow': step.flow,
+                                               'desired_result': step.desired_result,
+                                               'fixture': step.fixture,
+                                               'passed': step.passed,
+                                               'url': step.url})
+        form = form.as_p()
+        return HttpResponse(form)
 
 
 def step_form(request):
@@ -239,7 +295,8 @@ def flow_form(request):
     if request.method == 'POST':
 
         project_id = request.POST.get('project_id')
-        project = Project.objects.get(pk=project_id)
+        print(project_id)
+        project = Project.objects.get(id=project_id)
 
         passed = request.POST.get("passed")
         if passed == 'false':
@@ -354,83 +411,3 @@ def add_step(request):
 # class GroupViewSet(viewsets.ModelViewSet):
   # queryset = Group.objects.all()
    # serializer_class = GroupSerializer
-""" if step_type.url_validation == 'A' and step_type.has_fixture == 'A' and step_type.has_validation == 'A':
-                s_form = DefaultStepForm
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'A' and step_type.has_validation == 'R':
-                s_form = ValidateStepForm
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'A' and step_type.has_validation == 'D':
-                s_form = NoValidateStepForm
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'R' and step_type.has_validation == 'A':
-                s_form = FixtureStepForm
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'R' and step_type.has_validation == 'R':
-                s_form = MaybeURLStepForm
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'R' and step_type.has_validation == 'D':
-                s_form =
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'D' and step_type.has_validation == 'A':
-                s_form =
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'D' and step_type.has_validation == 'R':
-                s_form =
-
-            elif step_type.url_validation == 'A' and step_type.has_fixture == 'D' and step_type.has_validation == 'D':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'A' and step_type.has_validation == 'A':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'A' and step_type.has_validation == 'R':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'A' and step_type.has_validation == 'D':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'R' and step_type.has_validation == 'A':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'R' and step_type.has_validation == 'R':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'R' and step_type.has_validation == 'D':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'D' and step_type.has_validation == 'A':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'D' and step_type.has_validation == 'R':
-                s_form =
-
-            elif step_type.url_validation == 'R' and step_type.has_fixture == 'D' and step_type.has_validation == 'D':
-                s_form =
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'A' and step_type.has_validation == 'A':
-                s_form = DefaultStepForm
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'A' and step_type.has_validation == 'R':
-                s_form =
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'A' and step_type.has_validation == 'D':
-                s_form =
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'R' and step_type.has_validation == 'A':
-                s_form =
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'R' and step_type.has_validation == 'R':
-                s_form =
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'R' and step_type.has_validation == 'D':
-                s_form = FixtureOnlyStepForm
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'D' and step_type.has_validation == 'A':
-                s_form =
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'D' and step_type.has_validation == 'R':
-                s_form = ValidateOnlyStepForm
-
-            elif step_type.url_validation == 'D' and step_type.has_fixture == 'D' and step_type.has_validation == 'D':
-                s_form ="""

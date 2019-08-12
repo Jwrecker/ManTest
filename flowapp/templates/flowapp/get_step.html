@@ -14,4 +14,8 @@ Goal: {{ step.desired_result }}
 {% if step.fixture %}
 Fixture: {{ step.fixture }}
 {% endif %}
+<input class="step-input"
+type="image" src="{% static 'flowapp/images/trash.jpeg' %}" onclick="deleteStep('{{ step.id }}')" width="20" height="20">
+<input class="step-input"
+type="image" src="{% static 'flowapp/images/edit.jpeg' %}" onclick="editStepForm('{{ step.id }}')" width="20" height="20">
 </div>

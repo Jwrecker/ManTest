@@ -21,6 +21,20 @@
 	<button onclick="postStepForm()">
 		Submit
 	</button>
+</div>
+<div id="edit_form_div" style="display:none;">
+	<form action="/#/" method="post" id="edit_form">
+	</form>
+	<button onclick="postEditStepForm()">
+		Submit
+	</button>
+</div>
+<div id="flow_form_div" style="display:none;">
+	<form action="/#/" method="post" id="flow_form">
+	</form>
+	<button onclick="postFlowForm({{ project.id }})">
+		Submit
+	</button>
 		
 </div>
 <p id="step_type_id" style="display:none;"></p>
@@ -28,6 +42,7 @@
 <!--
 <script>document.getElementById("jst").innerHTML = getCookie('csrftoken') </script>
 -->
+<span onclick="getFlowForm({{ project.id }}, 'flow_form')">Add Flow</span>
 {% endblock %}
 {% block javascript %}
 <script>
@@ -106,32 +121,27 @@
 		console.log(newFlow)
 		// TODO: Refresh each unique flow by hitting get_flow_html(flow_id) (selector.load)
 	} 
-	 
-	// Make the ordered list steps sortable
-	$( function() {
-		$( " #ol_flow_1_b8e2a961 " ).sortable({
-			beforeStop: my_ui_sort_before_stop_callback
-		}).disableSelection();
-	} );
 
 	// Make the div steps sortable and connected (so you can sort from one into the other)
-	$( function() {
+	$( function () {
 		$( "{% for flow in project.flow_set.all %}#{{ flow.id }}, {% if forloop.last %} #{{flow.id}} {% endif %}{% endfor %}" ).sortable({
 			beforeStop: my_ui_sort_before_stop_callback,
 			update: my_ui_update_callback,
 			connectWith: ".connectedSortableSteps",
 		}).disableSelection();
 	});
+
 </script>
 <script>
-function update_project_function(flow_id) {
+function update_project_function(project_id) {
 	$.ajax ({
 		type: 'GET',
 		url: '/get-flows/',
-		data: {'flow_id': flow_id},
+		data: {'project_id': project_id},
 		success: function (data) {
 			console.log(data)
 			document.getElementById("flows").innerHTML = data
+			
 		}
 		});
 	}
@@ -157,6 +167,11 @@ function update_flow_function(flow_id) {
 				},
 			success: function (data) {
 				document.getElementById(flow_id+"_load_selector").innerHTML = data
+				$( "#"+flow_id ).sortable({
+					beforeStop: my_ui_sort_before_stop_callback,
+					update: my_ui_update_callback,
+					connectWith: ".connectedSortableSteps",
+				}).disableSelection();
 			}
 		});
 }
@@ -178,6 +193,7 @@ function postStepForm(){
 		originalData = {
 					"csrfmiddlewaretoken": '{{ csrf_token }}',
 					"step_type_id": document.getElementById("step_type_id").innerHTML,
+					"flow": step_flow_id
 		}
 		data = {...originalData, ...formData}
 		$.ajax({
@@ -202,8 +218,71 @@ function postStepForm(){
 }
 </script>
 <script>
-	function getStepForm(step_type_id, form_id, menu_id) {
+var big_step_id
+function deleteStep(step_id) {
+	$.ajax({
+		type: 'POST',
+		url: '/delete-step/',
+		data: {
+			"csrfmiddlewaretoken": '{{ csrf_token }}',
+			'step_id': step_id
+			},
+		success: update_flow_function
+		});
+}
+
+function editStepForm(step_id) {
+	console.log(step_id)
+	big_step_id = step_id
+	$.ajax({
+	type: 'GET',
+	url: '/edit-step/',
+	data: { 'step_id': step_id },
+	success: function (data) {
+			console.log("Got")
+			document.getElementById('edit_form').innerHTML = data
+			dialog=$("#edit_form_div").dialog({
+			});
+		}
+	});
+}
+
+function postEditStepForm(){
+		var $form = $("#edit_form");
+		var formData = getFormData($form);
+		console.log(formData)
+		var originalData = {
+					"csrfmiddlewaretoken": '{{ csrf_token }}',
+					"step_id": big_step_id,
+		}
+		data = {...originalData, ...formData}
+		console.log(originalData)
+		$.ajax({
+				type: 'POST',
+				url: 'http://127.0.0.1:8000/edit-step/',
+				data: data,
+				success: function (data) {
+					var data = data
+					console.log(data)
+					var status = data['status']
+					var form = data['form']
+					console.log(status)
+					if (status == "Failed"){
+						document.getElementById('edit_form').innerHTML = form
+						}
+					else {
+					$('#edit_form_div').dialog('close');
+					update_flow_function(data);
+					}
+					}
+		});
+}
+</script> 
+<script>
+var step_flow_id
+	function getStepForm(step_type_id, form_id, menu_id, flow_id) {
 	var dialogForm;
+	step_flow_id = flow_id
 		$.ajax({
 			type: 'GET',
 			url: 'http://127.0.0.1:8000/step-form/',
@@ -253,8 +332,49 @@ function postStepForm(){
 	}
 </script>
 <script>
-	
-
+	function getFlowForm(project_id, form_id) {
+	var dialogForm;
+		$.ajax({
+			type: 'GET',
+			url: 'http://127.0.0.1:8000/flow-form/',
+		success: function (data) {
+			console.log("Got")
+			document.getElementById(form_id).innerHTML = data
+			dialog=$("#flow_form_div").dialog({
+			});
+		}
+	});
+}
+	function postFlowForm(project_id) {
+		var $form = $("#flow_form");
+		var formData = getFormData($form);
+		console.log(formData)
+		originalData = {
+					"csrfmiddlewaretoken": '{{ csrf_token }}',
+					"project_id": project_id,
+		}
+		data = {...originalData, ...formData}
+		$.ajax({
+				type: 'POST',
+				url: 'http://127.0.0.1:8000/flow-form/',
+				data: data,
+				success: function (data) {
+					var data = data
+					console.log(data)
+					var status = data['status']
+					var form = data['form']
+					console.log(status)
+					if (status == "Failed"){
+						document.getElementById('flow_form').innerHTML = form
+						}
+					else {
+					$('#flow_form_div').dialog('close');
+					update_project_function(data);
+					}
+					}
+		});
+}
+		
 
 </script>
 <script>

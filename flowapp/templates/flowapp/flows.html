@@ -12,7 +12,7 @@
 			<ul>
 				{% for step_type in step_types %}
 					<li onclick="getStepForm('{{ step_type.id }}', 
-					'form', 'Context_Menu_{{ flow.id }}')">{{ step_type.name }}</li>
+					'form', 'Context_Menu_{{ flow.id }}', '{{ flow.id }}')">{{ step_type.name }}</li>
 				{% endfor %}
 			</ul>
 		</div>
