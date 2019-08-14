@@ -1,4 +1,5 @@
 {% extends "flowapp/base.html" %}
+{% load static %}
 
 {% block javascript %}
 <script>
@@ -58,12 +59,28 @@ function postForm(){
 		});
 }
 </script>
+<script>
+function deleteProject(project_id) {
+	$.ajax({	
+		type: 'POST',
+		url: '/delete-project/',
+		data: {
+			"csrfmiddlewaretoken": '{{ csrf_token }}',
+			'project_id': project_id
+			},
+		success: update_page_function
+		});
+}
+</script>
 {% endblock %}
 
 {% block content %}
 <ul class="main center">
 {% for project in main %}
-<li><a href="/project/{{ project.id }}">{{ project.name }}</a></li>
+<li>
+<input type="image" class="float_left" src="{% static 'flowapp/images/trash.jpeg' %}" onclick="deleteProject({{ project.id }})" width="20" height="20">
+<a href="/project/{{ project.id }}">{{ project.name }}</a>
+</li>
 <br>
 {% endfor %}
 </ul>

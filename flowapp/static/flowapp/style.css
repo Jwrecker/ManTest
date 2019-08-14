@@ -199,3 +199,7 @@ div.flow {
 	float: right;
 	padding: 2px;
 }
+
+.float_left {
+	float: left;
+}
