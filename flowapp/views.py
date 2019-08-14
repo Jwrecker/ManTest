@@ -75,6 +75,7 @@ def move_step(request):
     json_data = {"old_flow_id": old_flow_id, "new_flow_id": new_flow_id}
     return JsonResponse(json_data)
 
+
 @require_POST
 def move_flow(request):
     flow_id = request.POST['flow_id']
