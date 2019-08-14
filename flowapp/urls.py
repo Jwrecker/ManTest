@@ -19,7 +19,8 @@ urlpatterns = [
     path('flow-form/', views.flow_form, name='flow-form'),
     path('delete-step/', views.delete_step, name='delete-step'),
     path('edit-step/', views.edit_step, name='edit-step'),
-    path('delete-project/', views.delete_project, name='delete-project')
+    path('delete-project/', views.delete_project, name='delete-project'),
+    path('delete-flow/', views.delete_flow, name='delete-flow'),
     # path('step-form/<int:pk>', views.get_step_forms, name='step-form-get'
 ]
 

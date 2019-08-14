@@ -1,5 +1,7 @@
 {% load static %}
-<h3>{{ flow.name }} 
+<h3>
+<input type="image" src="{% static 'flowapp/images/trash.jpeg' %}" class="float_left" height="20" width="20" onclick="deleteFlow('{{ flow.id }}')">
+{{ flow.name }} 
 {% if forloop.last %}
 
 {% else %}

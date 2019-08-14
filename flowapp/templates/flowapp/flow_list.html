@@ -45,7 +45,6 @@
 {% endblock %}
 {% block javascript %}
 <script>
-var flows
 	// Declare a callback function to be called every time a sortable
 	// is about to land in its new (or same) location
 	var oldFlow;
@@ -131,6 +130,19 @@ var flows
 		}).disableSelection();
 	});
 
+</script>
+<script>
+function deleteFlow(flow_id) {
+	$.ajax({	
+		type: 'POST',
+		url: '/delete-flow/',
+		data: {
+			"csrfmiddlewaretoken": '{{ csrf_token }}',
+			'flow_id': flow_id
+			},
+		success: update_project_function
+		});
+}
 </script>
 <script>
 var flows = []

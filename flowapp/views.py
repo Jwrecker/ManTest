@@ -122,12 +122,21 @@ def get_flows(request):
     step_types = StepType.objects.all()
     return render(request, 'flowapp/flows.html', {'project': project, 'step_types': step_types})
 
+
 @require_POST
 def delete_project(request):
     project_id = request.POST.get('project_id')
     Project.objects.get(pk=project_id).delete()
     return HttpResponse("Deleted")
 
+
+@require_POST
+def delete_flow(request):
+    flow_id = request.POST.get('flow_id')
+    flow = Flow.objects.get(pk=flow_id)
+    project_id = flow.project.id
+    flow.delete()
+    return HttpResponse(project_id)
 
 
 def get_flow(request):

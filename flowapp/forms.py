@@ -14,7 +14,6 @@ class ProjectForm(ModelForm):
 class FlowForm(ModelForm):
     model = Flow
     fields = ['name', 'passed', 'order']
-    exclude = ['project']
 
 
 class StepForm(ModelForm):
