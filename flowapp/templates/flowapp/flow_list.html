@@ -45,6 +45,7 @@
 {% endblock %}
 {% block javascript %}
 <script>
+var flows
 	// Declare a callback function to be called every time a sortable
 	// is about to land in its new (or same) location
 	var oldFlow;
@@ -132,6 +133,23 @@
 
 </script>
 <script>
+var flows = []
+function addToArray (item) {
+	flows.push(item)
+}
+
+function makeFlowsDragAndDrop() {
+	flows.forEach(dragAndDrop);
+}
+
+function dragAndDrop (div_id) {
+	$( "#"+div_id ).sortable({
+			beforeStop: my_ui_sort_before_stop_callback,
+			update: my_ui_update_callback,
+			connectWith: ".connectedSortableSteps",
+		}).disableSelection();
+}
+
 function update_project_function(project_id) {
 	$.ajax ({
 		type: 'GET',
@@ -140,6 +158,10 @@ function update_project_function(project_id) {
 		success: function (data) {
 			console.log(data)
 			document.getElementById("flows").innerHTML = data
+			{% for flow in project.flow_set.all %}
+			addToArray('{{ flow.id }}');
+			{% endfor %}
+			makeFlowsDragAndDrop()
 			
 		}
 		});
@@ -156,6 +178,7 @@ function FlowChange(direction, flow_id) {
 		success: update_project_function
 	});
 }
+
 function update_flow_function(flow_id) {
 		console.log(flow_id)
 		$.ajax ({
